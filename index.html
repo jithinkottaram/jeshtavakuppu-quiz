@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>Jeshtavakuppu Revision Quiz</title>
+<style>
+/* Palette drawn from the Jeshtavakuppu workbook: the purple prayer panel,
+   the amber lesson ribbon, the cream page. Colours are written out in full
+   (no CSS variables) so older browsers render them too. */
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{
+  background:#2A1F38;color:#FBF2DE;
+  font-family:"Trebuchet MS",Verdana,Geneva,"Segoe UI",Roboto,sans-serif;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%;
+  -webkit-tap-highlight-color:rgba(240,160,40,.25);
+  padding:0 16px 64px;
+}
+.wrap{max-width:760px;margin:0 auto}
+.serif{font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif}
+
+/* Every tappable thing: no native styling, no double-tap zoom delay. */
+button,.lesson-pick{
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  -ms-touch-action:manipulation;touch-action:manipulation;
+  -webkit-user-select:none;-ms-user-select:none;user-select:none;
+}
+button{border-radius:0;margin:0;font-family:inherit;line-height:1.3}
+button::-moz-focus-inner{border:0;padding:0}
+
+/* ---------- masthead ---------- */
+.masthead{padding:40px 0 28px;text-align:center}
+.masthead h1{
+  font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  font-size:2.3rem;font-weight:400;letter-spacing:.01em;margin:0 0 6px;color:#FBF2DE;
+}
+.masthead p{margin:0;color:#CFC2B8;font-size:.95rem}
+
+/* ---------- the workbook ribbon ---------- */
+.ribbon{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-align:stretch;align-items:stretch;min-height:56px}
+.ribbon-tab{
+  -ms-flex:0 0 56px;flex:0 0 56px;width:56px;
+  background:#F0A028;border-radius:28px 28px 28px 0;
+  display:-webkit-box;display:-ms-flexbox;display:flex;
+  -webkit-box-orient:vertical;-ms-flex-direction:column;flex-direction:column;
+  -ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;
+  color:#2A1F38;font-weight:bold;line-height:1;position:relative;z-index:2;
+}
+.ribbon-tab .lbl{font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.ribbon-tab .num{font-size:1.35rem;margin-top:2px}
+.ribbon-body{
+  -ms-flex:1 1 auto;flex:1 1 auto;margin-left:-14px;
+  background:#C9761A;
+  -webkit-clip-path:polygon(0 0,100% 0,calc(100% - 18px) 100%,0 100%);
+  clip-path:polygon(0 0,100% 0,calc(100% - 18px) 100%,0 100%);
+  display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;
+  padding:10px 38px 10px 26px;
+  font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  font-size:1.2rem;color:#fff;text-transform:uppercase;letter-spacing:.02em;
+}
+
+/* ---------- shown only when scripts are not running ---------- */
+.norun{border:2px solid #F0A028;background:#372949;padding:16px 18px;margin:8px 0 6px}
+.norun p{margin:0 0 8px;font-size:.95rem}
+.norun p:last-child{margin-bottom:0}
+.norun-h{font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;font-size:1.2rem;color:#F0A028}
+.norun b{color:#FBF2DE}
+
+/* ---------- setup ---------- */
+.section-head{
+  font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  font-size:1.15rem;font-weight:bold;margin:34px 0 12px;color:#FBF2DE;
+}
+.section-head .hint{
+  font-family:"Trebuchet MS",Verdana,sans-serif;font-size:.82rem;font-weight:normal;
+  color:#CFC2B8;display:block;margin-top:2px;
+}
+.lesson-pick{display:block;width:100%;text-align:left;margin:0 0 10px;cursor:pointer;opacity:.5}
+.lesson-pick.on{opacity:1}
+.lesson-pick.on .ribbon-tab{box-shadow:0 0 0 3px #FBF2DE}
+.lesson-pick .meta{display:block;margin:5px 0 0 70px;font-size:.82rem;color:#CFC2B8}
+.lesson-pick:focus{outline:3px solid #FBF2DE;outline-offset:4px}
+
+.row{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-bottom:6px}
+.row>*{margin:0 8px 8px 0}
+
+.chip{
+  background:#372949;color:#FBF2DE;border:1px solid rgba(251,242,222,.18);border-radius:3px;
+  padding:10px 16px;font-size:.95rem;cursor:pointer;
+}
+.chip.on{background:#F0A028;color:#2A1F38;border-color:#F0A028;font-weight:bold}
+.chip:focus{outline:3px solid #FBF2DE;outline-offset:2px}
+
+textarea,input[type=number]{
+  display:block;width:100%;background:#372949;color:#FBF2DE;
+  border:1px solid rgba(251,242,222,.18);border-radius:3px;
+  padding:10px 12px;font-family:inherit;font-size:16px; /* 16px stops iPhone zooming in on focus */
+  -webkit-appearance:none;appearance:none;
+}
+textarea{min-height:92px;resize:vertical}
+textarea:focus,input:focus{outline:2px solid #F0A028;outline-offset:1px}
+.field-note{font-size:.8rem;color:#CFC2B8;margin:6px 0 0}
+.count-row{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center}
+.count-row input{width:110px;-ms-flex:0 0 110px;flex:0 0 110px;margin-right:12px}
+
+.toggle-line{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-align:start;align-items:flex-start;margin-top:14px;cursor:pointer}
+.toggle-line input{margin:3px 10px 0 0;width:20px;height:20px;-ms-flex:0 0 20px;flex:0 0 20px;accent-color:#F0A028}
+.toggle-line span{font-size:.92rem}
+.toggle-line small{display:block;color:#CFC2B8;font-size:.8rem}
+
+.start{
+  display:block;width:100%;margin-top:30px;
+  background:#F0A028;color:#2A1F38;border:none;border-radius:4px;padding:17px;
+  font-size:1.1rem;font-weight:bold;cursor:pointer;
+}
+.start:disabled{opacity:.35;cursor:not-allowed}
+.start:focus{outline:3px solid #FBF2DE;outline-offset:3px}
+
+.ghost{
+  background:transparent;border:1px solid rgba(251,242,222,.22);color:#CFC2B8;
+  border-radius:3px;padding:10px 16px;font-size:.9rem;cursor:pointer;
+}
+.ghost:focus{outline:3px solid #FBF2DE;outline-offset:2px}
+.ghost.tiny{font-size:.8rem;padding:7px 11px}
+
+@media (hover:hover){
+  .lesson-pick:hover{opacity:.8}
+  .lesson-pick.on:hover{opacity:1}
+  .chip:hover{background:#45355C}
+  .chip.on:hover{background:#F0A028}
+  .start:hover{background:#ffb445}
+  .ghost:hover{color:#FBF2DE;border-color:#CFC2B8}
+}
+
+/* ---------- memory verse panel ---------- */
+.verse-panel{margin-top:14px}
+.verse{border-left:3px solid #F0A028;background:#372949;padding:16px 20px;margin-bottom:12px}
+.verse .ref{font-size:.78rem;color:#F0A028;letter-spacing:.06em;margin-bottom:7px}
+.verse .txt{font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;font-size:1.08rem;line-height:1.65}
+.verse .reading{font-size:.82rem;color:#CFC2B8;margin-top:9px}
+
+/* ---------- quiz ---------- */
+.topbar{text-align:right;padding:18px 0 5px}
+.topbar button{margin:0 0 7px 7px}
+
+.quiz-head{
+  display:-webkit-box;display:-ms-flexbox;display:flex;
+  -webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between;
+  -ms-flex-align:baseline;align-items:baseline;margin:20px 0 14px;
+}
+.turn{font-size:1.05rem}
+.turn b{color:#F0A028}
+.counter{font-size:.85rem;color:#CFC2B8;white-space:nowrap;padding-left:12px}
+
+.progress{height:3px;background:rgba(251,242,222,.16);margin-bottom:26px}
+.progress i{display:block;height:100%;background:#F0A028;width:0}
+
+.qtext{
+  font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  font-size:1.65rem;line-height:1.4;margin:0 0 7px;
+}
+.qtag{font-size:.78rem;color:#F0A028;letter-spacing:.05em;margin:0 0 22px}
+
+.opts{margin-bottom:18px}
+.opt{
+  display:block;width:100%;text-align:left;margin:0 0 9px;
+  background:#372949;border:1px solid rgba(251,242,222,.18);border-radius:3px;
+  padding:0;color:#FBF2DE;cursor:pointer;overflow:hidden;
+}
+.opt-in{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-align:stretch;align-items:stretch;width:100%}
+.opt:disabled{cursor:default;color:#FBF2DE}
+.opt:focus{outline:3px solid #FBF2DE;outline-offset:2px}
+.opt .key{
+  -ms-flex:0 0 46px;flex:0 0 46px;width:46px;background:rgba(0,0,0,.22);
+  display:-webkit-box;display:-ms-flexbox;display:flex;
+  -ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;
+  font-weight:bold;font-size:1rem;color:#CFC2B8;
+}
+.opt .body{-ms-flex:1 1 auto;flex:1 1 auto;padding:14px 16px;font-size:1.05rem;line-height:1.45}
+.opt.right{background:#2F4A3F;border-color:#5FBF7F}
+.opt.right .key{background:#5FBF7F;color:#2A1F38}
+.opt.wrong{background:#4A2A3A;border-color:#E0645C}
+.opt.wrong .key{background:#E0645C;color:#fff}
+.opt.dim{opacity:.45}
+@media (hover:hover){ .opt:hover{background:#45355C;border-color:#CFC2B8} .opt:disabled:hover{background:#372949;border-color:rgba(251,242,222,.18)} .opt.right:hover{background:#2F4A3F;border-color:#5FBF7F} .opt.wrong:hover{background:#4A2A3A;border-color:#E0645C} }
+
+.skips{text-align:center;margin:0 0 22px}
+.skips button{margin:0 5px 8px}
+
+.reveal{border-top:1px solid rgba(251,242,222,.16);padding-top:18px;margin-bottom:22px}
+.verdict{font-size:1.05rem;font-weight:bold;margin:0 0 8px}
+.verdict.good{color:#5FBF7F}
+.verdict.bad{color:#E0645C}
+.verdict.steal{color:#F0A028}
+.source{font-size:.88rem;color:#CFC2B8;margin:0}
+.source b{color:#FBF2DE;font-weight:normal}
+
+/* ---------- scorebar ---------- */
+.scorebar{
+  display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;
+  border-top:1px solid rgba(251,242,222,.16);padding-top:16px;margin-top:8px;
+}
+.score{
+  -ms-flex:1 1 90px;flex:1 1 90px;min-width:90px;margin:0 8px 8px 0;
+  background:#372949;border-top:3px solid rgba(251,242,222,.16);padding:10px 13px;
+}
+.score.active{border-top-color:#F0A028;background:#45355C}
+.score .nm{font-size:.84rem;color:#CFC2B8;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score .pt{display:block;font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;font-size:1.5rem;line-height:1.2}
+.score.active .pt{color:#F0A028}
+.score-mini{
+  display:inline-block;margin:0 7px 7px 0;
+  background:#372949;border:1px solid rgba(251,242,222,.18);border-radius:3px;
+  padding:6px 11px;font-size:.88rem;color:#CFC2B8;
+}
+.score-mini b{font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;font-size:1.1rem;color:#FBF2DE;font-weight:normal;margin-left:7px}
+.score-mini.active{background:#F0A028;border-color:#F0A028;color:#2A1F38}
+.score-mini.active b{color:#2A1F38;font-weight:bold}
+
+/* ---------- results ---------- */
+.result-row{
+  display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-align:baseline;align-items:baseline;
+  padding:15px 0;border-bottom:1px solid rgba(251,242,222,.16);
+}
+.result-row .rank{font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;font-size:1.5rem;color:#F0A028;-ms-flex:0 0 40px;flex:0 0 40px}
+.result-row .who{-ms-flex:1 1 auto;flex:1 1 auto;font-size:1.1rem}
+.result-row .pts{font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;font-size:1.5rem;padding-left:14px}
+.result-row .det{display:block;font-size:.8rem;color:#CFC2B8}
+
+/* ---------- confirmation dialog (in-page; native confirm() is blocked in many viewers) ---------- */
+.modal{
+  position:fixed;top:0;right:0;bottom:0;left:0;z-index:999;
+  background:rgba(14,9,22,.8);overflow:auto;-webkit-overflow-scrolling:touch;
+  padding:22px;text-align:center;
+}
+.modal:before{content:"";display:inline-block;height:100%;vertical-align:middle}
+.modal-box{
+  display:inline-block;vertical-align:middle;text-align:left;
+  background:#372949;border:1px solid rgba(251,242,222,.18);border-top:4px solid #F0A028;
+  max-width:430px;width:100%;padding:26px 24px 22px;
+}
+.modal-msg{font-family:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;font-size:1.2rem;line-height:1.5;margin:0 0 6px}
+.modal-sub{font-size:.9rem;color:#CFC2B8;margin:0 0 20px}
+.modal-box .start{margin:0 0 9px;padding:14px;font-size:1rem}
+.modal-box .chip{display:block;width:100%;padding:13px;text-align:center;font-size:.95rem}
+
+@media (min-width:700px){
+  .masthead h1{font-size:2.9rem}
+  .qtext{font-size:1.95rem}
+  .opt .body{font-size:1.12rem}
+  .ribbon-body{font-size:1.3rem}
+}
+@media (max-width:520px){
+  .masthead h1{font-size:1.9rem}
+  .qtext{font-size:1.35rem}
+  .ribbon-body{font-size:.95rem;padding:9px 30px 9px 22px}
+  .opt .key{-ms-flex-preferred-size:38px;flex-basis:38px;width:38px}
+  .lesson-pick .meta{margin-left:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ SETUP ============ -->
+<div id="setup">
+  <div class="masthead">
+    <h1>Steps Towards Eternal Life</h1>
+    <p>Jeshtavakuppu Part&nbsp;1 &nbsp;|&nbsp; Revision quiz for Grade 9</p>
+  </div>
+
+  <!-- Shown by default; the script removes it once it has started.
+       Seen only in viewers that display the page without running it,
+       such as the Files app preview on iPad and iPhone. -->
+  <div id="noRun" class="norun">
+    <p class="norun-h">This preview can't run the quiz</p>
+    <p>The app you opened this in shows the page but doesn't run its buttons or questions.</p>
+    <p><b>iPad or iPhone:</b> open the quiz link in Safari, or open this file in an app that has its own web browser.<br>
+       <b>Windows, Mac or Android:</b> open the file in Chrome, Edge, Safari or Firefox.</p>
+  </div>
+
+  <div class="section-head">Choose the lessons
+    <span class="hint">Tap a lesson to include it. Questions from all chosen lessons are mixed together.</span>
+  </div>
+  <div id="lessonList"></div>
+
+  <div class="section-head">Who is answering?</div>
+  <div class="row">
+    <button type="button" class="chip on" id="modeTeams">Teams</button>
+    <button type="button" class="chip" id="modeSolo">Each student in turn</button>
+  </div>
+
+  <div id="teamsBox">
+    <div class="row" style="margin-top:12px">
+      <button type="button" class="chip" id="teams2">2 teams</button>
+      <button type="button" class="chip on" id="teams3">3 teams</button>
+    </div>
+    <div style="margin-top:12px">
+      <textarea id="teamNames" rows="3" aria-label="Team names, one per line">Team 1
+Team 2
+Team 3</textarea>
+      <p class="field-note">One team name per line. Change these to whatever your class uses.</p>
+    </div>
+  </div>
+
+  <div id="soloBox" hidden>
+    <div style="margin-top:12px">
+      <textarea id="soloNames" rows="5" aria-label="Student names, one per line" placeholder="Anna&#10;Joel&#10;Mariam&#10;Nathan"></textarea>
+      <p class="field-note">One student name per line. Each child gets a question in turn.</p>
+    </div>
+  </div>
+
+  <div class="section-head">How many questions?</div>
+  <div class="count-row">
+    <input type="number" id="qCount" min="1" max="99" value="15" inputmode="numeric" aria-label="Number of questions">
+    <span class="field-note" id="poolNote" style="margin:0"></span>
+  </div>
+  <p class="field-note">About 10 to 15% of each round are life application questions.</p>
+
+  <label class="toggle-line">
+    <input type="checkbox" id="optSteal">
+    <span>Let the next player steal
+      <small>If an answer is wrong, the next player or team may try for half the points.</small></span>
+  </label>
+
+  <label class="toggle-line">
+    <input type="checkbox" id="optVerses" checked>
+    <span>Include memory verse questions
+      <small>Worth 15 points instead of 10.</small></span>
+  </label>
+
+  <button type="button" class="start" id="startBtn">Start the quiz</button>
+  <div style="margin-top:12px;text-align:center">
+    <button type="button" class="ghost" id="versesBtn">Show the memory verses first</button>
+  </div>
+  <div class="verse-panel" id="versePanel" hidden></div>
+</div>
+
+<!-- ============ QUIZ ============ -->
+<div id="quiz" hidden>
+  <div class="topbar">
+    <button type="button" class="ghost tiny" id="homeBtn">Start screen</button>
+    <button type="button" class="ghost tiny" id="resetBtn">Reset round</button>
+    <button type="button" class="ghost tiny" id="quitBtn">End and show scores</button>
+  </div>
+  <div id="qRibbon"></div>
+  <div class="quiz-head">
+    <div class="turn" id="turnLabel"></div>
+    <div class="counter" id="qCounter"></div>
+  </div>
+  <div class="progress"><i id="progBar"></i></div>
+
+  <p class="qtext" id="qText"></p>
+  <p class="qtag" id="qTag"></p>
+  <div class="opts" id="opts"></div>
+  <div class="skips" id="skipRow">
+    <button type="button" class="ghost" id="skipQBtn">Skip this question</button>
+    <button type="button" class="ghost" id="skipTBtn">Pass to the next team</button>
+  </div>
+  <div class="reveal" id="reveal" hidden>
+    <p class="verdict" id="verdict"></p>
+    <p class="source" id="source"></p>
+    <button type="button" class="start" id="nextBtn" style="margin-top:16px">Next question</button>
+  </div>
+  <div class="scorebar" id="scorebar"></div>
+</div>
+
+<!-- ============ RESULTS ============ -->
+<div id="results" hidden>
+  <div class="masthead">
+    <h1 id="winnerLine"></h1>
+    <p id="resultSub"></p>
+  </div>
+  <div id="resultList"></div>
+  <button type="button" class="start" id="againBtn" style="margin-top:28px">Set up another round</button>
+</div>
+
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalMsg">
+    <p class="modal-msg" id="modalMsg"></p>
+    <p class="modal-sub" id="modalSub"></p>
+    <button type="button" class="start" id="modalYes">Yes</button>
+    <button type="button" class="chip" id="modalNo">No, carry on</button>
+  </div>
+</div>
+
+<script>
+/* =================================================================
+   QUESTION BANK
+   Sources: CSI Madhya Kerala Diocese, "Steps Towards Eternal Life",
+   Jeshtavakuppu Part 1 Children's Workbook, and the NIV Bible.
+   No other source has been used. The reference for each question
+   is shown after it is answered.
+
+   To add a lesson, append an entry in the same shape.
+   a = index of the correct option (0, 1 or 2). v:true = memory verse.
+
+   The script is written in plain older JavaScript on purpose, so it
+   runs in every current and most older browsers on Windows, Mac,
+   Android, iPhone and iPad.
+   ================================================================= */
+var LESSONS = {
+  1:{ title:"God and Humankind", reading:"Genesis 1, 2 and 3",
+      verseRef:"Genesis 5:1-2",
+      verse:"When God created mankind, he made them in the likeness of God. He created them male and female and blessed them. And he named them “Mankind” when they were created." },
+  2:{ title:"Be with God in Temptation", reading:"Genesis 39",
+      verseRef:"James 1:12",
+      verse:"Blessed is the one who perseveres under trial because, having stood the test, that person will receive the crown of life that the Lord has promised to those who love him." },
+  3:{ title:"The Fruits of Obedience", reading:"Genesis 22:1-19",
+      verseRef:"James 2:23",
+      verse:"And the scripture was fulfilled that says, “Abraham believed God, and it was credited to him as righteousness,” and he was called God’s friend." },
+  5:{ title:"The High Priestly Prayer of Jesus", reading:"John 17",
+      verseRef:"John 17:21",
+      verse:"That all of them may be one, Father, just as you are in me and I am in you. May they also be in us so that the world may believe that you have sent me." },
+  7:{ title:"The Holy Spirit: A Power or a Person?", reading:"John 14:16-26, Romans 8:1-17, Galatians 5:18-24, Ephesians 5:15-21",
+      verseRef:"John 14:16",
+      verse:"And I will ask the Father, and he will give you another advocate to help you and be with you forever\u2014the Spirit of truth." },
+  9:{ title:"The Vine and the Branches", reading:"John 15:1-18",
+      verseRef:"John 15:5-6",
+      verse:"I am the vine; you are the branches. Whoever abides in me and I in him, he it is that bears much fruit, for apart from me you can do nothing. If anyone does not abide in me he is thrown away like a branch and withers; and the branches are gathered, thrown into the fire, and burned." },
+  10:{ title:"God\u2019s Love and Human Love", reading:"1 John 4:7-21",
+      verseRef:"1 John 4:11-12",
+      verse:"Dear friends, since God so loved us, we also ought to love one another. No one has ever seen God; but if we love one another, God lives in us and his love is made complete in us." },
+  11:{ title:"Sin and Forgiveness", reading:"Genesis 3:1-24",
+      verseRef:"Romans 5:12",
+      verse:"Therefore, just as sin came into the world through one man, and death through sin, and so death spread to all men because all sinned." },
+  12:{ title:"Journey Through the Epistles", reading:"2 Corinthians 1:1-2, 1 Peter 1:1-2, Jude 1-2, 1 John 2:1-17",
+      verseRef:"1 John 2:17",
+      verse:"The world and its desires pass away, but the man who does the will of God lives forever." },
+  16:{ title:"Christian Stewardship", reading:"Matthew 25:14-30, Malachi 3:10",
+      verseRef:"Matthew 25:21",
+      verse:"His master replied, \u2018Well done, good and faithful servant! You have been faithful with a few things; I will put you in charge of many things. Come and share your master\u2019s happiness!\u2019" }
+};
+var LESSON_ORDER = [1,2,3,5,7,9,10,11,12,16];
+
+var BANK = {
+1:[
+ {q:"God gave human beings \u2018dominion\u2019 over creation. The word literally means \u2018to rule over\u2019, but what does it really denote here? (Genesis 1:28)",
+  o:["Preservation and conservation of nature","Complete ownership of the land and the sea","Authority to divide the earth among the nations"],a:0,
+  s:"Workbook p.7, ‘Nurturing the Environment’; Genesis 1:28 (NIV)"},
+ {q:"What is the prime motive behind God\u2019s creation of the universe?",
+  o:["The love of God","God’s wish to display his power","God’s need for someone to worship him"],a:0,
+  s:"Workbook p.6, Devotion"},
+ {q:"After forming the first man, why did the LORD God put him in the Garden of Eden? (Genesis 2:15)",
+  o:["To work it and take care of it","To give names to all the animals in it","To guard it against the serpent"],a:0,
+  s:"Genesis 2:15 (NIV); Workbook p.7"},
+ {q:"When God created the first man, how did the man become a living being? (Genesis 2:7)",
+  o:["God formed him from the dust of the ground and breathed the breath of life into his nostrils","God spoke a single word over the ground and the man stood up alive before him","God shaped him from the clay of the river that flowed out of the garden in Eden"],a:0,
+  s:"Genesis 2:7 (NIV); Workbook p.8, Activity Q6"},
+ {q:"God finished creation in six days and set the seventh day apart. For which two things was the seventh day set apart? (Genesis 2:2-3)",
+  o:["Rest and praising God","Rest and the naming of the animals","Worship and the planting of the garden"],a:0,
+  s:"Workbook p.7, ‘Motive of Creation’; Genesis 2:2-3 (NIV)"},
+ {q:"After Adam and Eve ate from the forbidden tree, what did they hear in the garden? (Genesis 3:8)",
+  o:["The sound of the LORD God walking in the garden in the cool of the day","The voice of the serpent calling them back to the tree","The sound of a flaming sword at the gate of the garden"],a:0,
+  s:"Genesis 3:8 (NIV); Workbook p.7, ‘Fellowship with God’"},
+ {q:"Adam and Eve\u2019s disobedience broke their fellowship with God. What was God\u2019s first move to rebind that fellowship? (Genesis 3:9)",
+  o:["He approached Adam by calling him by his name","He placed cherubim at the east side of the garden","He sent them out to work the ground they were taken from"],a:0,
+  s:"Workbook p.7, ‘Fellowship with God’; Genesis 3:9 (NIV). The other two are also in Genesis 3, at verses 24 and 23, but neither is a move towards fellowship."},
+ {q:"Complete the verse: \u201cWhen God created mankind, he made them in the ______ of God. He created them male and female and blessed them.\u201d",
+  o:["likeness","image and shadow","form and spirit"],a:0,v:true,
+  s:"Genesis 5:1-2 (NIV)"},
+ {q:"Where is the verse that begins \u201cWhen God created mankind\u2026\u201d found?",
+  o:["Genesis 5:1-2","Genesis 1:26-27","Genesis 2:7"],a:0,v:true,
+  s:"Genesis 5:1-2 (NIV). Genesis 1:26-27 also speaks of God’s image, which is why it is easy to confuse."},
+ {q:"At creation, what did God give human beings for food? (Genesis 1:29)",
+  o:["Every seed-bearing plant and every tree that has fruit with seed in it","Every green plant and the fish of the sea","The fruit of every tree in the garden without exception"],a:0,
+  s:"Genesis 1:29 (NIV); Workbook p.8, Activity Q1"},
+ {q:"During creation, why did God make the lights in the vault of the sky? (Genesis 1:14)",
+  o:["To separate day from night and to serve as signs to mark sacred times, days and years","To warm the earth so that the plants and the trees could grow and bear their fruit","To guide travellers and sailors on their journeys over the land and over the sea"],a:0,
+  s:"Genesis 1:14 (NIV); Workbook p.8, Activity Q4"},
+ {q:"On which day of creation did God make the greater light, the lesser light and the stars? (Genesis 1)",
+  o:["The fourth day","The second day","The fifth day"],a:0,
+  s:"Genesis 1:14-19 (NIV)"},
+ {q:"Psalm 8 says God made human beings a little lower than the angels and crowned them with what? (Psalm 8:5)",
+  o:["Glory and honour","Mercy and truth","Wisdom and strength"],a:0,
+  s:"Psalm 8:5 (NIV); Workbook p.7"},
+ {q:"After the serpent deceived the woman in Eden, what was part of the serpent\u2019s punishment? (Genesis 3:14-15)",
+  o:["It would crawl on its belly and eat dust","It would be driven out of the garden for ever","It would lose its voice and never speak again"],a:0,
+  s:"Genesis 3:14-15 (NIV); Workbook p.8"},
+ {q:"After Adam ate from the forbidden tree, what was his punishment? (Genesis 3:17-19)",
+  o:["The ground was cursed, and he would eat by painful toil and the sweat of his brow","He would wander the earth as a restless stranger and never find a place of rest","He would lose the right to name the animals and to rule over the birds and fish"],a:0,
+  s:"Genesis 3:17-19 (NIV); Workbook p.8"},
+ {q:"In the creation story, how is humankind different from the rest of God\u2019s creation? (Genesis 1:26-28)",
+  o:["Human beings were created in God’s own image and given dominion over all that God had created","Human beings alone were blessed by God and told to be fruitful and increase","Human beings alone were given the seed-bearing plants of the earth for food"],a:0,
+  s:"Workbook p.6; Genesis 1:26-28 (NIV); Workbook p.8, Activity Q5"},
+ {q:"The creation narratives in Genesis 1 to 3 tell of which three things?",
+  o:["The beginning, the fall and the redemption of the creation","The beginning, the judgment and the end of the creation","The creation, the covenant and the law"],a:0,
+  s:"Workbook p.7, Life Application"},
+ {q:"In creation, God gave human beings a partnership alongside him. What was that partnership?",
+  o:["The nurturance of creation alongside God","The rule of the nations alongside God","The keeping of the Sabbath alongside God"],a:0,
+  s:"Workbook p.7, Life Application"},
+ {q:"After God made the woman and brought her to the man, what does scripture say happens when a man leaves his father and mother? (Genesis 2:24)",
+  o:["He is united to his wife, and they become one flesh","He builds an altar and calls on the name of the LORD","He takes his share of the land and departs"],a:0,
+  s:"Genesis 2:24 (NIV). This verse is the ground for Workbook p.8, Activity Q2 on the first institution created by God."},
+ {q:"A river flowed out of Eden and divided into four rivers. Which of these is NOT one of the four? (Genesis 2:10-14)",
+  o:["The Jordan","The Gihon","The Euphrates"],a:0,
+  s:"Genesis 2:11-14 (NIV). The four are the Pishon, the Gihon, the Tigris and the Euphrates."},
+ {q:"The heavens, the sun, the animals and all creation praise God in their own way. What is humankind often busy with instead?",
+  o:["Unworthy things, instead of praising the divine creator","Building cities and towers that reach towards the heavens","Quarrelling over the land and the water God has given"],a:0,
+  s:"Workbook p.7, ‘Motive of Creation’"},
+ {q:"On which day of creation did God make the sea creatures and the birds? (Genesis 1)",
+  o:["The fifth day","The third day","The sixth day"],a:0,
+  s:"Genesis 1:20-23 (NIV)"},
+ {la:true,q:"Humankind moved away from God\u2019s glory through sin. What does the story of creation and the fall show about God\u2019s attitude towards us even then?",
+  o:["He never wishes our complete destruction","He leaves us to face the results alone","He forgets us until we return to him"],a:0,
+  s:"Workbook p.7, Life Application"},
+ {la:true,q:"God made human beings partners in caring for his creation. Which of these best lives out that responsibility today?",
+  o:["Avoiding waste and caring for the plants, animals and water around us","Using the earth\u2019s resources freely, since humans were given dominion","Leaving the care of nature to governments and scientists"],a:0,
+  s:"Workbook p.7: we are to inhabit the environment rather than dominate it."},
+ {la:true,q:"Adam and Eve hid from God after they disobeyed. When something comes between us and God today, what does he want us to do?",
+  o:["Return to fellowship with him by giving up whatever keeps us from him","Hide the mistake until we can fix it ourselves","Wait for God to forget what happened"],a:0,
+  s:"Workbook p.7, \u2018Fellowship with God\u2019"}
+],
+2:[
+ {q:"Blessed is the one who perseveres under trial. Having stood the test, what will that person receive?",
+  o:["The crown of life","The crown of righteousness","A double portion of blessing"],a:0,v:true,
+  s:"James 1:12 (NIV)"},
+ {q:"The Lord has promised a reward to those who persevere under trial. Who exactly are they described as?",
+  o:["Those who love him","Those who fear him","Those who serve him"],a:0,v:true,
+  s:"James 1:12 (NIV)"},
+ {q:"Where is the verse that begins \u201cBlessed is the one who perseveres under trial\u2026\u201d found?",
+  o:["James 1:12","James 2:23","1 Peter 5:4"],a:0,v:true,
+  s:"James 1:12 (NIV)"},
+ {q:"Joseph was taken to Egypt as a slave and bought by Potiphar. What position did Potiphar hold? (Genesis 39:1)",
+  o:["Captain of the guard","Chief cupbearer","Chief baker"],a:0,
+  s:"Genesis 39:1 (NIV). The cupbearer and the baker appear later, in Genesis 40."},
+ {q:"While Joseph served as a slave in Potiphar\u2019s house, the LORD was with him. What was the result? (Genesis 39:2)",
+  o:["He prospered","He was set free","He was given a wife"],a:0,
+  s:"Genesis 39:2 (NIV); Workbook p.11"},
+ {q:"After Potiphar put Joseph in charge of his household, why did the LORD bless that Egyptian\u2019s household? (Genesis 39:5)",
+  o:["Because of Joseph","Because Potiphar had begun to fear the God of Israel","Because of the famine that was coming"],a:0,
+  s:"Genesis 39:5 (NIV); Workbook p.11"},
+ {q:"When the LORD blessed Potiphar\u2019s household, where was that blessing on everything Potiphar had? (Genesis 39:5)",
+  o:["Both in the house and in the field","In the house alone","In the field alone"],a:0,
+  s:"Genesis 39:5 (NIV)"},
+ {q:"When Potiphar\u2019s wife tried to tempt Joseph, how did he describe what she was asking him to do? (Genesis 39:9)",
+  o:["A wicked thing, and a sin against God","A foolish thing, and a shame to his family","A crime against his master and no one else"],a:0,
+  s:"Genesis 39:9 (NIV); Workbook p.12"},
+ {q:"Joseph could have sinned with Potiphar\u2019s wife in secret, with no one watching. What stopped him?",
+  o:["He was aware that God can see everything, even when no one else can","He was afraid the other servants would report him","He had promised his father that he would stay pure"],a:0,
+  s:"Workbook p.12"},
+ {q:"When Potiphar\u2019s wife caught hold of Joseph, what did he leave behind as he ran out of the house? (Genesis 39:12)",
+  o:["His cloak","His sandals","His master’s seal"],a:0,
+  s:"Genesis 39:12 (NIV)"},
+ {q:"After Potiphar\u2019s wife falsely accused Joseph, where did Potiphar put him? (Genesis 39:20)",
+  o:["The prison, where the king’s prisoners were confined","The fields of Potiphar, along with the other labourers","The house of Pharaoh’s baker, under close guard"],a:0,
+  s:"Genesis 39:20 (NIV)"},
+ {q:"While Joseph was in prison, in whose eyes did the LORD grant him favour? (Genesis 39:21)",
+  o:["The prison warden","Pharaoh","Potiphar’s wife"],a:0,
+  s:"Genesis 39:21 (NIV); Workbook pp.11-12"},
+ {q:"Because the LORD was with Joseph in prison, what did the warden put him in charge of? (Genesis 39:22)",
+  o:["All those held in the prison","The king’s storehouses","The guards at the gate"],a:0,
+  s:"Genesis 39:22 (NIV); Workbook p.12"},
+ {q:"Joseph\u2019s story shows that trials and temptations are a natural part of life. What must we not do with them?",
+  o:["Yield to them for momentary benefits","Speak about them to anyone","Pray about them repeatedly"],a:0,
+  s:"Workbook p.12, Life Application"},
+ {q:"Joseph faced strong temptation in Potiphar\u2019s house. What does it mean that \u2018God was with Joseph\u2019?",
+  o:["When Joseph faced temptation, he trusted in God to overcome it","Joseph was never troubled by temptation at all","God removed every difficulty from Joseph’s path"],a:0,
+  s:"Workbook p.11, Devotion"},
+ {q:"If Joseph had given in to Potiphar\u2019s wife for a fleeting pleasure, what would have happened to him in the end?",
+  o:["He would have been caught one day","He would have been sent back to Canaan","He would only have lost his place in his master’s house"],a:0,
+  s:"Workbook p.12"},
+ {q:"Joseph refused to sin and was even sent to prison for it. What did he eventually become?",
+  o:["The greatest of all in Egypt","A free man who returned home","The chief of Potiphar’s guards"],a:0,
+  s:"Workbook p.12"},
+ {q:"Soon after Joseph came into his house, what did Potiphar see? (Genesis 39:3)",
+  o:["That the LORD was with Joseph and gave him success in everything he did","That Joseph was stronger than all the other servants","That Joseph could interpret dreams"],a:0,
+  s:"Genesis 39:3 (NIV); Workbook p.11"},
+ {q:"When Joseph was brought down to Egypt, from whom did Potiphar buy him? (Genesis 39:1)",
+  o:["The Ishmaelites","The Philistines of Gerar","The traders of Moab"],a:0,
+  s:"Genesis 39:1 (NIV). Genesis 37 also mentions Midianite merchants in the sale, which is why they are not used as a wrong answer here."},
+ {la:true,q:"Like Joseph, you are offered a dishonest shortcut that would bring a quick benefit, and no one would ever find out. What does Joseph\u2019s example teach?",
+  o:["Refuse, because God sees it even when no one else does","Take it this once, since no one will be harmed","Do whatever most of your friends would do"],a:0,
+  s:"Workbook p.12"},
+ {la:true,q:"Joseph kept doing right even though it landed him in prison. What does his story teach about doing right when it costs us?",
+  o:["God stays with us and works through it, even when doing right brings trouble","Doing right always brings an immediate reward","Doing right is only worth it when others notice"],a:0,
+  s:"Genesis 39:20-23 (NIV); Workbook p.12"},
+ {la:true,q:"A classmate is going through a hard time and wants to give up doing what is right. Which promise from the book of James could encourage them?",
+  o:["Those who persevere under trial will receive the crown of life","Those who give up early are spared further trials","Trials come only to those who have done wrong"],a:0,
+  s:"James 1:12 (NIV)"}
+],
+3:[
+ {q:"The book of James says Abraham believed God. What was Abraham called?",
+  o:["God’s friend","God’s servant","The father of many nations"],a:0,v:true,
+  s:"James 2:23 (NIV)"},
+ {q:"Complete the verse: \u201cAnd the scripture was fulfilled that says, \u2018Abraham believed God, and it was credited to him as ______.\u2019\u201d",
+  o:["righteousness","faithfulness","obedience"],a:0,v:true,
+  s:"James 2:23 (NIV)"},
+ {q:"Where is the verse that begins \u201cAnd the scripture was fulfilled that says, \u2018Abraham believed God\u2026\u2019\u201d found?",
+  o:["James 2:23","James 1:12","Romans 4:3"],a:0,v:true,
+  s:"James 2:23 (NIV). Romans 4:3 quotes the same line from Genesis, but only James 2:23 goes on to call Abraham God’s friend."},
+ {q:"When God called out to Abraham in order to test him, what did Abraham reply? (Genesis 22:1)",
+  o:["“Here I am”","“Speak, your servant is listening”","“What will you give me, Lord?”"],a:0,
+  s:"Genesis 22:1 (NIV); Workbook p.15"},
+ {q:"When God called him, Abraham gave a short and ready reply. What did that reply reveal about Abraham?",
+  o:["His interest to hear and obey God, and his humbleness","His surprise at being called by name","His readiness to argue with God"],a:0,
+  s:"Workbook p.15, point 1"},
+ {q:"God told Abraham to sacrifice his son Isaac. Where was Abraham told to go? (Genesis 22:2)",
+  o:["The region of Moriah","The plains of Mamre","The land of Beersheba"],a:0,
+  s:"Genesis 22:2 (NIV)"},
+ {q:"After God told Abraham to sacrifice Isaac, what showed Abraham\u2019s readiness to obey? (Genesis 22:3)",
+  o:["He got up early the next morning, loaded his donkey, cut the wood and set out","He sent his two servants on ahead of him to prepare the altar and the wood","He first went and told Sarah everything that God had asked him to do"],a:0,
+  s:"Genesis 22:3 (NIV); Workbook p.15, point 2"},
+ {q:"When God told Abraham to sacrifice his son Isaac, what was striking about the way Abraham responded?",
+  o:["He asked God no question and obeyed unconditionally","He asked God to explain the command first","He waited three days before answering"],a:0,
+  s:"Workbook p.15, point 2"},
+ {q:"Abraham set out with Isaac for the place of sacrifice. On which day of the journey did he see the place in the distance? (Genesis 22:4)",
+  o:["The third day","The second day","The seventh day"],a:0,
+  s:"Genesis 22:4 (NIV)"},
+ {q:"As Abraham and Isaac went up the mountain for the sacrifice, who carried the wood for the burnt offering? (Genesis 22:6)",
+  o:["Isaac","Abraham","The two servants"],a:0,
+  s:"Genesis 22:6 (NIV). Abraham himself carried the fire and the knife."},
+ {q:"On the way up the mountain to the sacrifice, what did Isaac ask his father? (Genesis 22:7)",
+  o:["“The fire and wood are here, but where is the lamb for the burnt offering?”","“Why have we left the two servants behind at the foot of the mountain?”","“How much farther must we walk before we reach the place, my father?”"],a:0,
+  s:"Genesis 22:7 (NIV); Workbook p.15"},
+ {q:"When Isaac asked where the lamb for the offering was, how did Abraham answer? (Genesis 22:8)",
+  o:["“God himself will provide the lamb for the burnt offering, my son.”","“We shall find one on the mountain, my son.”","“The LORD has not yet shown me, my son.”"],a:0,
+  s:"Genesis 22:8 (NIV)"},
+ {q:"When the angel stopped Abraham from sacrificing Isaac, what did the angel say God now knew about Abraham? (Genesis 22:12)",
+  o:["That he feared God, because he had not withheld his son","That he loved his son more than anything else","That he would become the father of many nations"],a:0,
+  s:"Genesis 22:12 (NIV)"},
+ {q:"After the angel stopped him, what did Abraham sacrifice in place of Isaac? (Genesis 22:13)",
+  o:["A ram caught by its horns in a thicket","A lamb brought up by the servants","A dove from the valley below"],a:0,
+  s:"Genesis 22:13 (NIV)"},
+ {q:"After God provided a ram in place of Isaac, what did Abraham name that place on the mountain? (Genesis 22:14)",
+  o:["The LORD Will Provide","The LORD Is My Banner","The LORD Is Peace"],a:0,
+  s:"Genesis 22:14 (NIV); Workbook p.15"},
+ {q:"Because Abraham did not withhold Isaac, God promised to multiply his descendants. How numerous would they be? (Genesis 22:17)",
+  o:["As the stars in the sky and the sand on the seashore","As the dust of the earth and the leaves of the forest","As the drops of rain and the blades of grass"],a:0,
+  s:"Genesis 22:17 (NIV)"},
+ {q:"God promised that all nations on earth would be blessed through Abraham\u2019s offspring. What reason did God give? (Genesis 22:18)",
+  o:["Because Abraham had obeyed God","Because Abraham had believed God","Because Abraham had built an altar"],a:0,
+  s:"Genesis 22:18 (NIV). Read the verse closely: the reason given there is obedience."},
+ {q:"After the test on the mountain in Moriah, where did Abraham go to stay? (Genesis 22:19)",
+  o:["Beersheba","Hebron","Bethel"],a:0,
+  s:"Genesis 22:19 (NIV)"},
+ {q:"Abraham\u2019s test shows how God responds when we obey him. What is God\u2019s response to obedience?",
+  o:["His care and his provision","His silence until the next test","His immediate reward of wealth"],a:0,
+  s:"Workbook pp.14-15"},
+ {q:"Abraham was ready to give up Isaac in obedience to God. What does his obedience show true obedience to be?",
+  o:["The real worship","The beginning of faith","The reward of prayer"],a:0,
+  s:"Workbook p.16"},
+ {q:"God tested Abraham by asking for Isaac. Why does God test us?",
+  o:["To transform us","To punish our doubts","To compare us with one another"],a:0,
+  s:"Workbook p.16"},
+ {q:"For a believer today, what keeps and strengthens the relationship with God?",
+  o:["Prayer, which is conversing with God","Sacrifice offered at the altar","Keeping the festivals"],a:0,
+  s:"Workbook p.15"},
+ {q:"Abraham\u2019s willingness to give up Isaac shows that obeying God is sacrificial. What else does it demand?",
+  o:["Complete submission","Public testimony","Long preparation"],a:0,
+  s:"Workbook p.15, point 3"},
+ {q:"Abraham built an altar of stones on the mountain to sacrifice Isaac. What do those stones reflect?",
+  o:["The areas of Abraham’s obedience","The years of Abraham’s waiting","The tribes that would come from Isaac"],a:0,
+  s:"Workbook p.16"},
+ {la:true,q:"Abraham obeyed God even when the command was hard to understand. If God\u2019s word asks something hard of you today, what does his example teach?",
+  o:["Respond humbly and obey without delay","Wait until you understand every reason before obeying","Obey only the parts that feel comfortable"],a:0,
+  s:"Workbook p.15"},
+ {la:true,q:"Abraham\u2019s obedience on the mountain in Moriah was his real worship. What does that mean for our worship in church on Sundays?",
+  o:["Worship in church is complete only when daily life is lived in obedience","Attending church is enough even if daily life does not change","Obedience matters only on special occasions"],a:0,
+  s:"Workbook p.16"},
+ {la:true,q:"Having learnt from Abraham\u2019s test, we pray for God\u2019s help to understand something about obedience. What is it?",
+  o:["That obedience is the best sacrifice that pleases God","That obedience is needed only when we are tested","That obedience earns us a reward from God"],a:0,
+  s:"Workbook p.17, Prayer"}
+],
+5:[
+ {v:true,q:"Complete the verse: \u201cThat all of them may be ______, Father, just as you are in me and I am in you.\u201d",
+  o:["one","holy","saved"],a:0,
+  s:"John 17:21 (NIV)"},
+ {v:true,q:"Jesus prayed that all believers would be one, just as he and the Father are one. What did he say their unity would lead the world to believe?",
+  o:["That the Father has sent him","That the disciples are righteous","That the kingdom has already come"],a:0,
+  s:"John 17:21 (NIV)"},
+ {v:true,q:"Where is the verse that begins \u201cThat all of them may be one, Father\u2026\u201d found?",
+  o:["John 17:21","John 15:12","John 14:16"],a:0,
+  s:"John 17:21 (NIV)"},
+ {q:"Jesus\u2019 long prayer for his disciples and all believers, prayed just before his suffering, is known by what name?",
+  o:["The High Priestly Prayer","The Lord\u2019s Prayer","The Prayer of Thanksgiving"],a:0,
+  s:"Workbook p.22; John 17"},
+ {q:"Jesus\u2019 prayer in John 17 marks the end of his earthly ministry. What does it mark the beginning of?",
+  o:["His intercessory ministry","His teaching ministry in Galilee","His healing ministry"],a:0,
+  s:"Workbook p.22"},
+ {q:"As Jesus began his prayer for his disciples before the cross, where did he look? (John 17:1)",
+  o:["Toward heaven","Toward the temple","Toward his disciples"],a:0,
+  s:"John 17:1 (NIV)"},
+ {q:"In his prayer before the cross, how did Jesus describe eternal life? (John 17:3)",
+  o:["Knowing the only true God, and Jesus Christ whom he sent","Living for ever in the promised land","Keeping every command of the law"],a:0,
+  s:"John 17:3 (NIV)"},
+ {q:"In his prayer, Jesus said he had brought glory to the Father on earth. How had he done it? (John 17:4)",
+  o:["By finishing the work the Father gave him to do","By performing great miracles before the crowds","By teaching in the temple every day"],a:0,
+  s:"John 17:4 (NIV)"},
+ {q:"Jesus prayed for his disciples, who would remain in a world that hated them. What did he ask the Father for them? (John 17:15)",
+  o:["That they be protected from the evil one, not taken out of the world","That they be taken out of the world to be with him","That the world would stop hating them"],a:0,
+  s:"John 17:15 (NIV)"},
+ {q:"Jesus asked the Father to sanctify his disciples. By what, and what did he say God\u2019s word is? (John 17:17)",
+  o:["By the truth; your word is truth","By the law; your word is a command","By fasting; your word is a light"],a:0,
+  s:"John 17:17 (NIV)"},
+ {q:"In his prayer before the cross, why did Jesus say the world hated his disciples? (John 17:14)",
+  o:["They are not of the world, just as he is not of the world","They had broken the laws of the Romans","They refused to worship in the temple"],a:0,
+  s:"John 17:14 (NIV)"},
+ {q:"In his prayer, Jesus said none of those the Father gave him had been lost except one. Who? (John 17:12)",
+  o:["The one doomed to destruction, so that Scripture would be fulfilled","The rich young ruler, who went away sad","Thomas, who doubted"],a:0,
+  s:"John 17:12 (NIV)"},
+ {q:"Jesus\u2019 prayer before the cross did not stop with his disciples. Who else did he pray for? (John 17:20)",
+  o:["Those who would believe in him through their message","The priests and teachers of the law","The Roman rulers of Judea"],a:0,
+  s:"John 17:20 (NIV)"},
+ {q:"Jesus asked the Father to protect his disciples so that they may be one. By what power did he ask it? (John 17:11)",
+  o:["The power of the Father\u2019s name","The power of the angels","The power of the disciples\u2019 own faith"],a:0,
+  s:"John 17:11 (NIV)"},
+ {q:"In his prayer, Jesus said that just as the Father sent him into the world, he had done something with his disciples. What? (John 17:18)",
+  o:["Sent them into the world","Kept them apart from the world","Sent them back to their homes"],a:0,
+  s:"John 17:18 (NIV)"},
+ {q:"In his prayer before the cross, what did Jesus want for those the Father had given him? (John 17:24)",
+  o:["That they be with him where he is and see his glory","That they rule over the nations","That they never face any suffering"],a:0,
+  s:"John 17:24 (NIV)"},
+ {q:"Prayer is described as the foremost component for success in life. What is the basis for this?",
+  o:["An unbroken relationship with God Almighty","Praying for long hours every day","Using the right words in prayer"],a:0,
+  s:"Workbook p.21, Devotion"},
+ {q:"Which book of the Bible is described as one of the great collections of prayer?",
+  o:["Psalms","Leviticus","Numbers"],a:0,
+  s:"Workbook p.21, Devotion"},
+ {q:"Though Jesus was filled with the Holy Spirit, he prayed for God\u2019s will throughout his ministry. What does his example teach us?",
+  o:["Only through the strength of prayer can we overcome trials","Prayer is needed only by those who lack the Spirit","Prayer matters only in times of trouble"],a:0,
+  s:"Workbook pp.21-22"},
+ {q:"In his prayer in John 17, Jesus prayed for three groups in turn. Whom did he pray for first, and why?",
+  o:["For his own glory, because he had fulfilled the responsibilities given to him","For the disciples, because they were weak","For the world, because it had rejected him"],a:0,
+  s:"Workbook p.22, Life Application"},
+ {la:true,q:"A friend at school is going through a hard time at home. What does Jesus\u2019 prayer for others teach you to do?",
+  o:["Pray for them, since prayer includes requests for others as well as ourselves","Pray only for your own needs, since others will pray for themselves","Wait until they ask you before praying"],a:0,
+  s:"Workbook p.22, Life Application; p.23, Prayer"},
+ {la:true,q:"God has given you responsibilities at home, at school and in church. What does Jesus\u2019 prayer teach about them?",
+  o:["Fulfil them faithfully, as Jesus fulfilled the work given to him","Leave them for others to finish","Treat them as less important than your own plans"],a:0,
+  s:"Workbook p.22, Life Application"},
+ {la:true,q:"You face a problem that feels too big to handle. How should you see prayer?",
+  o:["As the most powerful weapon against the obstacles and difficulties we face","As a last resort when everything else has failed","As something of little importance"],a:0,
+  s:"Workbook p.22, Life Application"}
+],
+7:[
+ {v:true,q:"Jesus promised his disciples another advocate. Complete the verse: \u201c\u2026the Spirit of ______.\u201d",
+  o:["truth","power","peace"],a:0,
+  s:"John 14:16 (NIV)"},
+ {v:true,q:"Jesus promised that the Father would give another advocate to help his disciples. For how long would this advocate be with them?",
+  o:["Forever","Until the day of Pentecost","Until their work was finished"],a:0,
+  s:"John 14:16 (NIV)"},
+ {v:true,q:"Where is the verse that begins \u201cAnd I will ask the Father, and he will give you another advocate\u2026\u201d found?",
+  o:["John 14:16","John 16:7","Acts 1:8"],a:0,
+  s:"John 14:16 (NIV)"},
+ {q:"At creation, when the earth was formless and empty, what was the Spirit of God doing? (Genesis 1:2)",
+  o:["Hovering over the waters","Separating the land from the sea","Resting on the seventh day"],a:0,
+  s:"Genesis 1:2 (NIV); Workbook p.29"},
+ {q:"The prophet Joel foretold that God would pour out his Spirit. On whom? (Joel 2:28)",
+  o:["On all people","On the priests only","On the kings of Israel"],a:0,
+  s:"Joel 2:28 (NIV); Workbook p.29"},
+ {q:"Joel\u2019s prophecy about the pouring out of God\u2019s Spirit came true at a particular time. When? (Acts 2:17)",
+  o:["At Pentecost","At the baptism of Jesus","At the Last Supper"],a:0,
+  s:"Acts 2:17 (NIV); Workbook p.29"},
+ {q:"How was the experience of the Holy Spirit in the Old Testament different from that of the New Testament church?",
+  o:["It was not given to all people","It was given to everyone without exception","The Holy Spirit was not yet at work at all"],a:0,
+  s:"Workbook p.29"},
+ {q:"When Jesus speaks about the Holy Spirit, which word does he use, showing that the Spirit is a person and not just a power? (John 15:26)",
+  o:["\u2018He\u2019, not \u2018it\u2019","\u2018It\u2019, not \u2018he\u2019","\u2018They\u2019, not \u2018he\u2019"],a:0,
+  s:"John 15:26 (NIV); Workbook p.29"},
+ {q:"John uses the Greek word \u2018paracletos\u2019 for the Holy Spirit. How is it translated?",
+  o:["Advocate, helper or comforter","Power, energy or force","Prophet, priest or king"],a:0,
+  s:"Workbook p.29"},
+ {q:"Paul calls the Holy Spirit a deposit or guarantee, like a first payment. What does this mean? (2 Corinthians 1:22)",
+  o:["The Spirit is a first gift that will be experienced in fullness in heaven","The Spirit is a reward given only to the apostles","The Spirit promises that Christians will never suffer"],a:0,
+  s:"2 Corinthians 1:22 (NIV); Workbook pp.29-30"},
+ {q:"Paul says believers are sealed with the Holy Spirit. What does a seal show? (Ephesians 4:30)",
+  o:["Ownership: that we belong to God","That we can never sin again","That our training is complete"],a:0,
+  s:"Ephesians 4:30 (NIV); Workbook p.30"},
+ {q:"Talking with Nicodemus about being born again, Jesus compared the Spirit\u2019s work to something we feel but cannot see or control. What? (John 3:8)",
+  o:["The wind","The rain","The sunrise"],a:0,
+  s:"John 3:8 (NIV); Workbook p.30"},
+ {q:"Jesus said the Holy Spirit would bring the world awareness of three things. Which? (John 16:8)",
+  o:["Sin, righteousness and judgment","Wealth, success and honour","Law, sacrifice and ritual"],a:0,
+  s:"John 16:8 (NIV); Workbook p.30"},
+ {q:"The Spirit we received does not make us slaves who live in fear. What does he bring about, and what do we cry? (Romans 8:15)",
+  o:["Adoption to sonship; we cry \u2018Abba, Father\u2019","Freedom from all work; we cry \u2018Holy, holy\u2019","Power over others; we cry \u2018Hosanna\u2019"],a:0,
+  s:"Romans 8:15 (NIV); Workbook p.30"},
+ {q:"What does Paul say about anyone who does not have the Spirit of Christ? (Romans 8:9)",
+  o:["They do not belong to Christ","They are still God\u2019s children","They will be filled later through good works"],a:0,
+  s:"Romans 8:9 (NIV); Workbook p.30"},
+ {q:"Who are the children of God, according to Paul? (Romans 8:14)",
+  o:["Those who are led by the Spirit of God","Those born into a Christian family","Those who never make mistakes"],a:0,
+  s:"Romans 8:14 (NIV)"},
+ {q:"Galatians 5:22-23 lists nine qualities, yet Paul uses the singular word \u2018fruit\u2019. What does this show?",
+  o:["All these qualities must be present together in a believer filled with the Spirit","Only one of the nine is needed","Each believer receives just one of them"],a:0,
+  s:"Galatians 5:22-23 (NIV); Workbook p.31"},
+ {q:"Which of these is part of the fruit of the Spirit? (Galatians 5:22-23)",
+  o:["Forbearance","Prophecy","Speaking in tongues"],a:0,
+  s:"Galatians 5:22-23 (NIV). Prophecy and tongues are gifts of the Spirit (1 Corinthians 12:10), not fruit."},
+ {q:"\u2018Be filled with the Spirit\u2019 is given as a command. Since the Spirit is a person, not a force, what does being filled mean?",
+  o:["Submitting oneself completely to the Spirit","Feeling a strong emotion during worship","Receiving a special power once in a lifetime"],a:0,
+  s:"Workbook p.31"},
+ {q:"The disciples were filled with the Holy Spirit in Acts chapter 2. Was that the only time it happened? (Acts 4:31)",
+  o:["No, they were filled again on other occasions","Yes, it happened only once","Only Peter was ever filled again"],a:0,
+  s:"Acts 2:4; 4:31 (NIV); Workbook p.31"},
+ {q:"Jesus promised the Holy Spirit would come to his disciples. What would the Spirit do for them? (John 14:26)",
+  o:["Teach them all things and remind them of everything Jesus said","Give them earthly riches","Take away all their troubles"],a:0,
+  s:"John 14:26 (NIV)"},
+ {q:"Jesus said the world cannot accept the Spirit he promised to send. Why not? (John 14:17)",
+  o:["It neither sees him nor knows him","He comes only to priests","He speaks in a language the world cannot understand"],a:0,
+  s:"John 14:17 (NIV)"},
+ {la:true,q:"You want to grow in the fruit of the Spirit, such as patience and self-control. What will help you bear that fruit?",
+  o:["Meditating on God\u2019s word, prayer and a life closer to Christ","Waiting for the fruit to appear without any effort","Going to large meetings for a spiritual experience"],a:0,
+  s:"Workbook p.31"},
+ {la:true,q:"How can the people around you recognise that the Holy Spirit is present in a person\u2019s life?",
+  o:["Through the fruit of the Spirit seen in that person\u2019s life","Through how loudly that person prays","Through how many special meetings that person attends"],a:0,
+  s:"Workbook p.31, Life Application"},
+ {la:true,q:"Someone tells you the Holy Spirit belongs only to special charismatic meetings, not to an ordinary church like yours. What is true?",
+  o:["The Holy Spirit is given to everyone who believes in Jesus Christ","Only people at such meetings receive the Spirit","The Holy Spirit is a new idea from recent years"],a:0,
+  s:"Workbook pp.28 and 30"}
+],
+9:[
+ {v:true,q:"Complete the verse: \u201cI am the vine; you are the branches. Whoever abides in me and I in him, he it is that bears much fruit, for apart from me you can do ______.\u201d",
+  o:["nothing","very little","no lasting work"],a:0,
+  s:"John 15:5"},
+ {v:true,q:"Jesus said that anyone who does not abide in him is like a branch. What happens to that branch?",
+  o:["It is thrown away and withers, then gathered, thrown into the fire and burned","It is grafted onto another vine","It is pruned so that it bears more fruit"],a:0,
+  s:"John 15:6"},
+ {v:true,q:"Where is the verse that begins \u201cI am the vine; you are the branches\u2026\u201d found?",
+  o:["John 15:5-6","John 10:11","John 6:35"],a:0,
+  s:"John 15:5-6"},
+ {q:"In Jesus\u2019 picture of the vine, who is the gardener? (John 15:1)",
+  o:["The Father","Jesus himself","The disciples"],a:0,
+  s:"John 15:1 (NIV)"},
+ {q:"In Jesus\u2019 picture of the vine, what does the gardener do with branches that bear fruit? (John 15:2)",
+  o:["Prunes them so they bear even more fruit","Cuts them off","Leaves them untouched"],a:0,
+  s:"John 15:2 (NIV)"},
+ {q:"Teaching about the vine, Jesus told his disciples they were already clean. Why? (John 15:3)",
+  o:["Because of the word he had spoken to them","Because they had washed before the meal","Because they had offered sacrifices"],a:0,
+  s:"John 15:3 (NIV)"},
+ {q:"In his teaching on the vine, what did Jesus say brings glory to the Father? (John 15:8)",
+  o:["That you bear much fruit, showing yourselves to be his disciples","That you build a great temple","That you never face any trial"],a:0,
+  s:"John 15:8 (NIV)"},
+ {q:"Why did Jesus teach his disciples about remaining in him, the vine? (John 15:11)",
+  o:["So that his joy may be in them and their joy may be complete","So that they would become famous","So that they would rule over Israel"],a:0,
+  s:"John 15:11 (NIV)"},
+ {q:"What command did Jesus give in his teaching about the vine and the branches? (John 15:12)",
+  o:["Love each other as I have loved you","Go and baptise all nations","Keep the Sabbath day holy"],a:0,
+  s:"John 15:12 (NIV)"},
+ {q:"Teaching about the vine, what did Jesus call the greatest love? (John 15:13)",
+  o:["Laying down one\u2019s life for one\u2019s friends","Giving all one\u2019s money to the poor","Forgiving an enemy many times"],a:0,
+  s:"John 15:13 (NIV)"},
+ {q:"Jesus told his disciples they were his friends, on one condition. What was it? (John 15:14)",
+  o:["That they do what he commands","That they eat with him","That they follow him for three years"],a:0,
+  s:"John 15:14 (NIV)"},
+ {q:"Why did Jesus no longer call his disciples servants? (John 15:15)",
+  o:["He had made known to them everything he learned from the Father","They had become rich","They had stopped working"],a:0,
+  s:"John 15:15 (NIV)"},
+ {q:"In his teaching on the vine, Jesus spoke about choosing. Who chose whom, and for what purpose? (John 15:16)",
+  o:["Jesus chose the disciples and appointed them to bear fruit that will last","The disciples chose Jesus to be their king","The priests chose the disciples to serve in the temple"],a:0,
+  s:"John 15:16 (NIV)"},
+ {q:"Jesus warned that the world might hate his disciples. What did he tell them to remember? (John 15:18)",
+  o:["That it hated him first","That they must have done something wrong","That they should leave the world"],a:0,
+  s:"John 15:18 (NIV)"},
+ {q:"Jesus taught about the vine and the branches during a night meal before his suffering. What had he done for his disciples at that meal?",
+  o:["Washed their feet","Healed a blind man","Fed five thousand people"],a:0,
+  s:"Workbook p.38, Devotion"},
+ {q:"Why did Jesus use the picture of a grapevine to teach his disciples?",
+  o:["It was an important plant of Palestine and a common sight for them","It was used in the temple sacrifices","It grew only in Jerusalem"],a:0,
+  s:"Workbook p.38"},
+ {q:"Jesus used a grapevine to teach about abiding in him. What are the three stages of a grapevine?",
+  o:["Pruning, growth and harvest","Planting, watering and selling","Budding, flowering and dying"],a:0,
+  s:"Workbook p.39"},
+ {q:"On a grapevine like the one Jesus described, where are the fruits produced?",
+  o:["From the new buds; the old buds do not bear fruit","From the main stem only","From the roots"],a:0,
+  s:"Workbook p.39"},
+ {q:"God called Abraham his friend and spoke with Moses as a friend. What does it mean for us to be called friends of Christ? (Isaiah 41:8; Exodus 33:11)",
+  o:["It raises us to a higher level of acceptance and respect","It means we no longer need to obey","It is a title kept only for the apostles"],a:0,
+  s:"Isaiah 41:8; Exodus 33:11 (NIV); Workbook p.39"},
+ {q:"Living in Christ, the vine, brings fruit into our lives. Which of these is one of them?",
+  o:["Answers to our prayers","Freedom from all illness","Great wealth"],a:0,
+  s:"Workbook p.39; John 15:7, 16 (NIV)"},
+ {q:"Jesus\u2019 love, shown in his teaching on the vine, is selfless and everlasting. What else is true of it?",
+  o:["It is unchanging: the same yesterday, today and forever","It changes when we fail","It is only for those who are good"],a:0,
+  s:"Workbook p.39"},
+ {la:true,q:"A painful time in your life feels like being pruned. What does the picture of the vine teach about it?",
+  o:["Pruning is painful, but it is a sign of God\u2019s love and helps us bear good fruit","It means God has cut us off","It is a punishment we should hide from others"],a:0,
+  s:"Workbook p.39, Life Application"},
+ {la:true,q:"God has blessed you with a talent, and others praise you for the good you do. What does the picture of the vine remind you?",
+  o:["Do not boast or be selfish, but be thankful and praise God","Take the credit, since you worked hard for it","Stop using the talent so you do not become proud"],a:0,
+  s:"Workbook p.39, Life Application"},
+ {la:true,q:"Life is compared to vapour, a flower, a dream and a bubble. How should that shape the way we treat the people around us?",
+  o:["Love them now, as though tomorrow may never come","Wait until we are older to show love","Love only those who love us back"],a:0,
+  s:"Workbook p.39"}
+],
+10:[
+ {v:true,q:"Complete the verse: \u201cDear friends, since God so loved us, we also ought to ______ one another.\u201d",
+  o:["love","forgive","serve"],a:0,
+  s:"1 John 4:11 (NIV)"},
+ {v:true,q:"\u201cNo one has ever seen God.\u201d What does the same verse say happens if we love one another?",
+  o:["God lives in us and his love is made complete in us","We will see God face to face","All our sins are forgotten"],a:0,
+  s:"1 John 4:12 (NIV)"},
+ {v:true,q:"Where is the verse that begins \u201cDear friends, since God so loved us\u2026\u201d found?",
+  o:["1 John 4:11-12","John 3:16","1 Corinthians 13:4"],a:0,
+  s:"1 John 4:11-12 (NIV)"},
+ {q:"John wrote his first letter, a pastoral letter of love, to a church that was struggling. What was its problem?",
+  o:["Its members were fighting each other because of false teachings","It had no leaders to guide it","It had run out of money"],a:0,
+  s:"Workbook p.41, Devotion"},
+ {q:"Writing about love, where does John say love comes from, and who knows God? (1 John 4:7)",
+  o:["Love comes from God; everyone who loves has been born of God and knows God","Love comes from people; only the wise know God","Love comes from the law; the priests know God"],a:0,
+  s:"1 John 4:7 (NIV)"},
+ {q:"John says whoever does not love does not know God. Why? (1 John 4:8)",
+  o:["Because God is love","Because God is far away","Because love is only a human feeling"],a:0,
+  s:"1 John 4:8 (NIV)"},
+ {q:"According to John\u2019s letter, how did God show his love among us? (1 John 4:9)",
+  o:["He sent his one and only Son into the world so that we might live through him","He gave Israel the law","He made the world beautiful"],a:0,
+  s:"1 John 4:9 (NIV)"},
+ {q:"John explains why we are able to love at all. What reason does he give? (1 John 4:19)",
+  o:["Because God first loved us","Because others love us","Because it is our duty"],a:0,
+  s:"1 John 4:19 (NIV)"},
+ {q:"John says there is no fear in love. What drives out fear, and why? (1 John 4:18)",
+  o:["Perfect love, because fear has to do with punishment","Courage, because fear is weakness","Wealth, because fear comes from being poor"],a:0,
+  s:"1 John 4:18 (NIV); Workbook p.42"},
+ {q:"What does John call someone who says they love God but hates their brother or sister? (1 John 4:20)",
+  o:["A liar","A weak believer","A stranger to the faith"],a:0,
+  s:"1 John 4:20 (NIV)"},
+ {q:"What command does John give to everyone who loves God? (1 John 4:21)",
+  o:["They must also love their brother and sister","They must love God more and ignore others","They must love God on the Sabbath day"],a:0,
+  s:"1 John 4:21 (NIV)"},
+ {q:"God gave his Son out of a whole-hearted, sacrificial and unconditional love. What is this love called?",
+  o:["Agape","Hosanna","Shalom"],a:0,
+  s:"Workbook p.42"},
+ {q:"John gives three reasons why we should love one another. Which of these is one of them?",
+  o:["God lives in human beings","Love makes us popular","Love is rewarded with riches"],a:0,
+  s:"Workbook pp.41-42"},
+ {q:"Before God showed his love through his Son, human beings did not know how to love. Why?",
+  o:["They were under the dominion of sin","They were too young to understand","They had not yet been given the law"],a:0,
+  s:"Workbook p.42"},
+ {q:"When God gave his Son to redeem humanity, did people deserve that love?",
+  o:["No, they had no merit to receive it","Yes, because they were good","Only those who kept the law did"],a:0,
+  s:"Workbook p.42"},
+ {q:"Having received God\u2019s unconditional love, what does God expect of us?",
+  o:["To love others unconditionally and unceasingly","To love only those who love us","To love God and not worry about others"],a:0,
+  s:"Workbook p.42"},
+ {q:"John says God lives in some people and they in God. In whom does God live? (1 John 4:15)",
+  o:["Those who acknowledge that Jesus is the Son of God","Those who go to church most often","Every person, whatever they believe"],a:0,
+  s:"1 John 4:15 (NIV); Workbook p.42"},
+ {la:true,q:"Today, love is often treated like a transaction, giving only to receive. What does God\u2019s love teach instead?",
+  o:["True love gives without expecting anything back","Love should always be returned equally","Love is a feeling that comes and goes"],a:0,
+  s:"Workbook p.42, Life Application"},
+ {la:true,q:"A classmate keeps being unkind to you. How does God\u2019s love living in you help?",
+  o:["It enables you to love even those who are against you","It lets you avoid them for ever","It allows you to repay them the same way"],a:0,
+  s:"Workbook p.42"},
+ {la:true,q:"How can young people become examples of perfect love in the world around them?",
+  o:["By living in fellowship with God, not conformed to the world","By following whatever the world calls love","By keeping their faith completely private"],a:0,
+  s:"Workbook p.42, Life Application"}
+],
+11:[
+ {v:true,q:"Complete the verse: \u201cTherefore, just as sin came into the world through one man, and death through sin, and so death spread to all men because all ______.\u201d",
+  o:["sinned","fell","died"],a:0,
+  s:"Romans 5:12"},
+ {v:true,q:"Where is the verse that begins \u201cTherefore, just as sin came into the world through one man\u2026\u201d found?",
+  o:["Romans 5:12","Romans 3:23","Genesis 3:6"],a:0,
+  s:"Romans 5:12"},
+ {q:"The first man and woman have names with meanings. What do the names Adam and Eve mean?",
+  o:["Adam: a man made of sand; Eve: life","Adam: the first king; Eve: the helper","Adam: son of God; Eve: the beautiful one"],a:0,
+  s:"Workbook p.44"},
+ {q:"Adam and Eve were free to choose whether to eat from the forbidden tree. Why was that freedom necessary?",
+  o:["Because loving and praising God must be freely chosen","Because God wanted to test their strength","Because the fruit was poisonous"],a:0,
+  s:"Workbook p.45"},
+ {q:"John names three things in the world that lead people into sin. Which list is correct? (1 John 2:16)",
+  o:["The lust of the flesh, the lust of the eyes and the pride of life","Greed, anger and envy","Hunger, thirst and tiredness"],a:0,
+  s:"1 John 2:16 (NIV); Workbook p.45"},
+ {q:"The forbidden tree looked beautiful to Eve. Which of the desires that lead to sin does this match?",
+  o:["The desire of the eyes","The desire of the flesh","The pride of life"],a:0,
+  s:"Workbook p.45; 1 John 2:16"},
+ {q:"Sin is divided into two types. What are they?",
+  o:["Sins of commission and sins of omission","Small sins and big sins","Public sins and private sins"],a:0,
+  s:"Workbook p.45"},
+ {q:"God has blessed us with talents, health and wealth. If we fail to use them for his will and to help others, which kind of sin is it?",
+  o:["A sin of omission","A sin of commission","It is not a sin at all"],a:0,
+  s:"Workbook p.45"},
+ {q:"After his great sin, King David confessed to God. Against whom did he say he had sinned? (Psalm 51:4)",
+  o:["Against God only","Against his people","Against his own family"],a:0,
+  s:"Psalm 51:4 (NIV); Workbook pp.45-46"},
+ {q:"What does Paul say is true of every person? (Romans 3:23)",
+  o:["All have sinned and fall short of the glory of God","Most people are good at heart","Only a few have ever sinned"],a:0,
+  s:"Romans 3:23 (NIV); Workbook p.45"},
+ {q:"Paul compares sin to work that earns a wage. What are the wages of sin, and what is God\u2019s free gift? (Romans 6:23)",
+  o:["Death; eternal life in Christ Jesus our Lord","Suffering; earthly riches","Shame; a long life"],a:0,
+  s:"Romans 6:23 (NIV); Workbook p.45"},
+ {q:"What has set believers free from the law of sin and death? (Romans 8:2)",
+  o:["The law of the Spirit who gives life in Christ Jesus","The law given to Moses","Our own good deeds"],a:0,
+  s:"Romans 8:2 (NIV); Workbook p.45"},
+ {q:"What is true repentance?",
+  o:["Accepting the sin, regretting it and turning completely to God","Feeling sorry only when caught","Doing extra good deeds to balance the wrong"],a:0,
+  s:"Workbook p.45"},
+ {q:"After denying Jesus three times, which disciple wept bitterly and became an example of repentance? (Matthew 26:75)",
+  o:["Peter","Thomas","Andrew"],a:0,
+  s:"Matthew 26:75 (NIV); Workbook p.45"},
+ {q:"When we confess our sins and walk in the light, what purifies us from all sin? (1 John 1:7)",
+  o:["The blood of Jesus","Our good works","Offerings made in the temple"],a:0,
+  s:"1 John 1:7 (NIV); Workbook p.46"},
+ {q:"Who has the right to the tree of life and may go through the gates into the city? (Revelation 22:14)",
+  o:["Those who wash their robes","Those born in Jerusalem","Those who have never been tempted"],a:0,
+  s:"Revelation 22:14 (NIV); Workbook p.46"},
+ {q:"Jesus taught where sin comes from. Where does it begin?",
+  o:["In the evil within a person\u2019s heart","Only in the actions others can see","In bad luck and circumstances"],a:0,
+  s:"Workbook p.45; Mark 7:21 (NIV)"},
+ {la:true,q:"The devil prowls around like a roaring lion, waiting to trap us. How can we stand against him? (1 Peter 5:8)",
+  o:["By being firm in our faith in Christ","By relying on our own strength","By staying away from church"],a:0,
+  s:"1 Peter 5:8 (NIV); Workbook p.46, Life Application"},
+ {la:true,q:"Friends offer you a cigarette or alcohol. How should you respond?",
+  o:["Say a firm no, since these feed the desires of the flesh","Try it once so you are not left out","Accept it if no adult is watching"],a:0,
+  s:"Workbook p.46, Life Application"},
+ {la:true,q:"You realise you have done something wrong. What is the right response?",
+  o:["Confess it and return to God with a changed mind","Hide it and hope no one finds out","Blame someone else for it"],a:0,
+  s:"Workbook pp.45-46"}
+],
+12:[
+ {v:true,q:"Complete the verse: \u201cThe world and its desires pass away, but the man who does the ______ lives forever.\u201d",
+  o:["will of God","work of the law","good of others"],a:0,
+  s:"1 John 2:17"},
+ {v:true,q:"Where is the verse that begins \u201cThe world and its desires pass away\u2026\u201d found?",
+  o:["1 John 2:17","James 1:12","1 Peter 5:8"],a:0,
+  s:"1 John 2:17"},
+ {q:"The word \u2018epistle\u2019 comes from a Greek word. What does it mean?",
+  o:["A letter; something sent","A song of praise","A prophecy"],a:0,
+  s:"Workbook p.48"},
+ {q:"How many of the 27 books of the New Testament are epistles?",
+  o:["21","13","7"],a:0,
+  s:"Workbook pp.49-50"},
+ {q:"The epistles of the New Testament are divided into two main groups. What are they?",
+  o:["Pauline Epistles and General Epistles","Old letters and new letters","Gospels and Acts"],a:0,
+  s:"Workbook p.49"},
+ {q:"How many letters, from Romans to Philemon, were written by Paul?",
+  o:["13","21","7"],a:0,
+  s:"Workbook p.49"},
+ {q:"How are Paul\u2019s thirteen letters arranged in the Bible?",
+  o:["By the place or person they were addressed to, not by the date written","In the order they were written","Alphabetically by title"],a:0,
+  s:"Workbook p.49"},
+ {q:"Which three of Paul\u2019s letters are the Pastoral Epistles?",
+  o:["1 Timothy, 2 Timothy and Titus","Romans, Galatians and Hebrews","James, Jude and 1 Peter"],a:0,
+  s:"Workbook p.49"},
+ {q:"Which of Paul\u2019s letters were written from prison?",
+  o:["Ephesians, Philippians, Colossians and Philemon","Romans, 1 Corinthians and 2 Corinthians","1 and 2 Thessalonians"],a:0,
+  s:"Workbook p.49"},
+ {q:"What is the main purpose of Paul\u2019s Pastoral Epistles?",
+  o:["To teach those who want to become church leaders","To solve problems in a city\u2019s church","To warn believers against deceivers"],a:0,
+  s:"Workbook p.49"},
+ {q:"Who wrote the General Epistles of the New Testament?",
+  o:["Peter, John, James and Jude","Paul, Timothy and Titus","Matthew, Mark and Luke"],a:0,
+  s:"Workbook p.49; Epistles reference sheet"},
+ {q:"Who wrote the Epistle to the Hebrews?",
+  o:["The author is unknown; some link it to Paul and others do not","Peter","James"],a:0,
+  s:"Workbook p.49"},
+ {q:"Other gospels and letters also circulated when the New Testament was being formed. Why were only 27 books included?",
+  o:["They were received as apostolic and authoritative","They were the shortest","They were the oldest writings"],a:0,
+  s:"Workbook p.50"},
+ {q:"Paul wrote his letters over about 15 years. Which are thought to be among the earliest, and which among the last?",
+  o:["1 and 2 Thessalonians earliest; 2 Timothy among the last","Philemon earliest; Romans last","Titus earliest; 1 Corinthians last"],a:0,
+  s:"Epistles reference sheet"},
+ {q:"Paul asked that one of his letters be read in another church too. What does this show about the epistles? (Colossians 4:16)",
+  o:["They were meant for all believers, not only their first readers","Only that one church needed the teaching","Paul was unsure of what he had written"],a:0,
+  s:"Colossians 4:16 (NIV); Epistles reference sheet"},
+ {q:"The apostles\u2019 teaching is called the foundation of the church. Who is its cornerstone? (Ephesians 2:20)",
+  o:["Christ Jesus","Moses","Paul"],a:0,
+  s:"Ephesians 2:20 (NIV); Epistles reference sheet"},
+ {q:"How does Paul introduce himself at the start of his second letter to the Corinthians? (2 Corinthians 1:1)",
+  o:["An apostle of Christ Jesus by the will of God","A servant of the high priest","A teacher of the law in Jerusalem"],a:0,
+  s:"2 Corinthians 1:1 (NIV)"},
+ {q:"To whom did Peter write his first letter? (1 Peter 1:1)",
+  o:["God\u2019s elect, exiles scattered in provinces such as Pontus, Galatia and Asia","The church in Rome only","Timothy, his son in the faith"],a:0,
+  s:"1 Peter 1:1 (NIV)"},
+ {q:"How does Jude describe himself at the start of his letter? (Jude 1)",
+  o:["A servant of Jesus Christ and a brother of James","An apostle and a brother of Peter","A prophet sent to Jerusalem"],a:0,
+  s:"Jude 1 (NIV)"},
+ {q:"John wrote to believers as his \u2018dear children\u2019. If anyone does sin, who speaks to the Father in our defence? (1 John 2:1)",
+  o:["Jesus Christ, the Righteous One","The angels","Our church leaders"],a:0,
+  s:"1 John 2:1 (NIV)"},
+ {q:"According to John, how must anyone who claims to live in Christ live? (1 John 2:6)",
+  o:["As Jesus did","As the world does","As their parents did"],a:0,
+  s:"1 John 2:6 (NIV)"},
+ {q:"What does John tell believers not to love? (1 John 2:15)",
+  o:["The world or anything in the world","Their enemies","Their own families"],a:0,
+  s:"1 John 2:15 (NIV)"},
+ {la:true,q:"Paul writes, \u201cspeak truthfully to your neighbour, for we are all members of one body.\u201d How does this apply in your class or youth group? (Ephesians 4:25)",
+  o:["Be honest with one another, because we belong to each other","Tell the truth only to close friends","Hide the truth whenever it might cause trouble"],a:0,
+  s:"Ephesians 4:25 (NIV); Epistles reference sheet"},
+ {la:true,q:"Some friends spend all their energy chasing whatever is popular in the world. What does the teaching of the epistles suggest you do?",
+  o:["Resist worldly attractions and let the epistles guide your choices","Follow the crowd so you fit in","Ignore the epistles, since they were written for others"],a:0,
+  s:"Workbook p.50, Life Application"},
+ {la:true,q:"The epistles were written to first-century readers. How can they shape your life today?",
+  o:["By reading and studying them, and living by the Word of God","By keeping them only for exams","By reading them only on special occasions"],a:0,
+  s:"Workbook p.51, Prayer; Epistles reference sheet"}
+],
+16:[
+ {v:true,q:"Complete the verse: \u201cCome and share your master\u2019s ______!\u201d",
+  o:["happiness","kingdom","riches"],a:0,
+  s:"Matthew 25:21 (NIV)"},
+ {v:true,q:"In the parable of the talents, what did the master call the servants who used their talents well?",
+  o:["Good and faithful","Wise and clever","Rich and blessed"],a:0,
+  s:"Matthew 25:21 (NIV)"},
+ {v:true,q:"Where is the verse that includes \u201cI will put you in charge of many things\u201d found?",
+  o:["Matthew 25:21","Matthew 25:29","Luke 12:48"],a:0,
+  s:"Matthew 25:21 (NIV). The same words are repeated to the second servant in verse 23."},
+ {q:"What does stewardship mean?",
+  o:["Good management of what God has entrusted to us","Owning many things","Giving away everything we have"],a:0,
+  s:"Workbook p.63"},
+ {q:"Who is the owner of the earth and everything in it? (Psalm 24:1)",
+  o:["The LORD","The people who work the land","Whoever buys it"],a:0,
+  s:"Psalm 24:1 (NIV); Workbook p.63"},
+ {q:"The basis of Christian stewardship is what God gave out of love for the world. What did he give? (John 3:16)",
+  o:["His one and only Son","The land of Israel","The law of Moses"],a:0,
+  s:"John 3:16 (NIV); Workbook p.64"},
+ {q:"Paul calls believers God\u2019s co-workers. What does this mean for how we treat God\u2019s world? (1 Corinthians 3:9)",
+  o:["God has made us partners in caring for the resources of his world","God pays us for the work we do","God needs us in order to rule"],a:0,
+  s:"1 Corinthians 3:9 (NIV); Workbook p.64"},
+ {q:"In Jesus\u2019 time, what did the word \u2018talent\u2019 mean, and what does it mean today?",
+  o:["A measure of weight then; different abilities today","A kind of crop then; a hobby today","A gift of land then; a job today"],a:0,
+  s:"Workbook p.64"},
+ {q:"In the parable of the talents, how many did the master give to each of his three servants? (Matthew 25:15)",
+  o:["Five, two and one","Ten, five and one","Three, two and one"],a:0,
+  s:"Matthew 25:15 (NIV)"},
+ {q:"In the parable of the talents, on what basis did the master divide his wealth among the servants? (Matthew 25:15)",
+  o:["According to each servant\u2019s ability","According to each servant\u2019s age","Equally among all three"],a:0,
+  s:"Matthew 25:15 (NIV); Workbook p.64"},
+ {q:"In the parable of the talents, what did the servant with one talent do with it? (Matthew 25:18)",
+  o:["Dug a hole and hid it in the ground","Gave it away to the poor","Spent it at once"],a:0,
+  s:"Matthew 25:18 (NIV)"},
+ {q:"When the master returned, what excuse did the one-talent servant give? (Matthew 25:24-25)",
+  o:["That his master was a hard man and he was afraid","That he had been robbed on the road","That he had been too ill to work"],a:0,
+  s:"Matthew 25:24-25 (NIV)"},
+ {q:"In the parable of the talents, what did the master call the servant who hid his talent? (Matthew 25:26)",
+  o:["Wicked and lazy","Foolish but young","Careless but honest"],a:0,
+  s:"Matthew 25:26 (NIV); Workbook p.64"},
+ {q:"The master said the one-talent servant should at least have done something with the money. What? (Matthew 25:27)",
+  o:["Put it on deposit with the bankers to earn interest","Shared it with the other servants","Returned it before the master left"],a:0,
+  s:"Matthew 25:27 (NIV)"},
+ {q:"In the parable of the talents, who received the talent taken from the servant who hid it? (Matthew 25:28)",
+  o:["The servant who had ten","The servant who had four","No one; the master kept it"],a:0,
+  s:"Matthew 25:28 (NIV)"},
+ {q:"What happened to the worthless servant in the parable of the talents? (Matthew 25:30)",
+  o:["He was thrown outside, into the darkness","He was given a second chance","He was sent to work in the fields"],a:0,
+  s:"Matthew 25:30 (NIV)"},
+ {q:"Jesus taught about people who are given much. What will be asked of them? (Luke 12:48)",
+  o:["Much will be demanded","They may keep it all for themselves","They must return it at once"],a:0,
+  s:"Luke 12:48 (NIV); Workbook p.65"},
+ {q:"Through the prophet Malachi, what did God ask his people to bring into the storehouse? (Malachi 3:10)",
+  o:["The whole tithe","Their firstborn sons","Their weapons of war"],a:0,
+  s:"Malachi 3:10 (NIV)"},
+ {q:"God told his people to test him in their giving. What did he promise in return? (Malachi 3:10)",
+  o:["To throw open the floodgates of heaven and pour out more blessing than they could store","To make them rulers over the nations","To remove all their enemies at once"],a:0,
+  s:"Malachi 3:10 (NIV)"},
+ {q:"Which parable shows the result of not using our time wisely? (Matthew 25:1-13)",
+  o:["The parable of the wise and foolish virgins","The parable of the lost sheep","The parable of the prodigal son"],a:0,
+  s:"Matthew 25:1-13 (NIV); Workbook p.65"},
+ {q:"Everyone gets the same 24 hours in a day. How should Christians use the time God gives them?",
+  o:["With time for prayer, worship and those in distress, not only for ourselves","Entirely for ourselves","Entirely on study and work"],a:0,
+  s:"Workbook p.65; Ephesians 5:15-16 (NIV)"},
+ {la:true,q:"You have a gift for singing, teaching or sport but feel too shy to use it. What does the parable of the talents teach?",
+  o:["Use it, because talents that are not used are lost","Keep it hidden so you never make mistakes","Wait until you are better than everyone else"],a:0,
+  s:"Workbook pp.64-65"},
+ {la:true,q:"You receive some money as a gift. As a faithful steward, what should you do with it?",
+  o:["Set apart a portion faithfully for God\u2019s work and for those in need","Spend it all on yourself","Save it all and give nothing away"],a:0,
+  s:"Workbook p.65"},
+ {la:true,q:"You are planning your day as a faithful steward of time. Which plan is best?",
+  o:["One that includes time for personal devotion and family prayer","One filled only with games and screens","One with no set time for God"],a:0,
+  s:"Workbook p.67, Activity Q5"}
+]
+};
+
+/* ================= helpers ================= */
+var LETTERS = ["A","B","C"];
+function $(id){ return document.getElementById(id); }
+function show(el){ el.removeAttribute("hidden"); el.hidden = false; }
+function hide(el){ el.setAttribute("hidden",""); el.hidden = true; }
+function isHidden(el){ return el.hasAttribute("hidden"); }
+function on(el, fn){
+  el.addEventListener("click", function(e){ if(e && e.preventDefault) e.preventDefault(); fn(e); }, false);
+}
+function setOn(el, yes){
+  var c = (" " + el.className + " ").replace(" on ", " ");
+  el.className = (yes ? c + "on" : c).replace(/^\s+|\s+$/g,"").replace(/\s+/g," ");
+  el.setAttribute("aria-pressed", yes ? "true" : "false");
+}
+function hasClass(el, c){ return (" " + el.className + " ").indexOf(" " + c + " ") > -1; }
+function addClass(el, c){ if(!hasClass(el,c)) el.className += " " + c; }
+function shuffle(a){
+  for (var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function lines(text){
+  var parts = String(text).split(/\r?\n/), out = [];
+  for (var i = 0; i < parts.length; i++){
+    var t = parts[i].replace(/^\s+|\s+$/g,"");
+    if (t) out.push(t);
+  }
+  return out;
+}
+function scrollTop(){ try { window.scrollTo(0,0); } catch(e){} }
+
+/* ================= state ================= */
+var S = {
+  lessons:{1:true,2:true,3:true,5:true,7:true,9:true,10:true,11:true,12:true,16:true},
+  mode:"teams", teamCount:3,
+  players:[], queue:[], idx:0,
+  owner:0,      /* whose turn this question belongs to */
+  turn:0,       /* who is answering right now (differs during a steal) */
+  answered:false, stolen:false,
+  steal:false, verses:true, count:15,
+  stealTimer:null, pending:null
+};
+
+/* ================= setup screen ================= */
+function ribbonHTML(n, title){
+  return '<div class="ribbon"><div class="ribbon-tab"><span class="lbl">Lesson</span>' +
+         '<span class="num">' + n + '</span></div><div class="ribbon-body">' + esc(title) + '</div></div>';
+}
+
+function drawLessons(){
+  var html = "";
+  for (var i = 0; i < LESSON_ORDER.length; i++){
+    var n = LESSON_ORDER[i], L = LESSONS[n];
+    html += '<div class="lesson-pick' + (S.lessons[n] ? ' on' : '') + '" role="button" tabindex="0" ' +
+            'data-lesson="' + n + '" aria-pressed="' + (S.lessons[n] ? 'true' : 'false') + '">' +
+            ribbonHTML(n, L.title) +
+            '<span class="meta">Bible reading: ' + L.reading + '. Memory verse: ' + L.verseRef + '. ' +
+            BANK[n].length + ' questions.</span></div>';
+  }
+  $("lessonList").innerHTML = html;
+  var picks = $("lessonList").getElementsByTagName("div");
+  for (var k = 0; k < picks.length; k++){
+    if (!hasClass(picks[k], "lesson-pick")) continue;
+    (function(el){
+      var toggle = function(){
+        var n = parseInt(el.getAttribute("data-lesson"), 10);
+        S.lessons[n] = !S.lessons[n];
+        setOn(el, S.lessons[n]);
+        refreshPool();
+      };
+      on(el, toggle);
+      el.addEventListener("keydown", function(e){
+        var k = e.key || e.keyCode;
+        if (k === "Enter" || k === " " || k === "Spacebar" || k === 13 || k === 32){
+          e.preventDefault(); toggle();
+        }
+      }, false);
+    })(picks[k]);
+  }
+}
+
+function pool(){
+  var p = [];
+  for (var i = 0; i < LESSON_ORDER.length; i++){
+    var n = LESSON_ORDER[i];
+    if (!S.lessons[n]) continue;
+    for (var j = 0; j < BANK[n].length; j++){
+      var q = BANK[n][j];
+      if (!S.verses && q.v) continue;
+      p.push({q:q.q, o:q.o, a:q.a, v:!!q.v, la:!!q.la, s:q.s, lesson:n});
+    }
+  }
+  return p;
+}
+
+function refreshPool(){
+  var n = pool().length;
+  $("poolNote").innerHTML = n ? ("available from your chosen lessons: " + n) : "choose at least one lesson";
+  $("startBtn").disabled = (n < 1);
+}
+
+function setMode(m){
+  S.mode = m;
+  setOn($("modeTeams"), m === "teams");
+  setOn($("modeSolo"), m === "solo");
+  if (m === "teams"){ show($("teamsBox")); hide($("soloBox")); }
+  else { hide($("teamsBox")); show($("soloBox")); }
+}
+on($("modeTeams"), function(){ setMode("teams"); });
+on($("modeSolo"),  function(){ setMode("solo"); });
+
+function setTeams(n){
+  S.teamCount = n;
+  setOn($("teams2"), n === 2);
+  setOn($("teams3"), n === 3);
+  var cur = lines($("teamNames").value), out = [];
+  for (var i = 0; i < n; i++) out.push(cur[i] || ("Team " + (i + 1)));
+  $("teamNames").value = out.join("\n");
+}
+on($("teams2"), function(){ setTeams(2); });
+on($("teams3"), function(){ setTeams(3); });
+
+$("optVerses").addEventListener("change", function(){ S.verses = $("optVerses").checked; refreshPool(); }, false);
+$("optSteal").addEventListener("change",  function(){ S.steal = $("optSteal").checked; }, false);
+
+on($("versesBtn"), function(){
+  var p = $("versePanel");
+  if (!isHidden(p)){ hide(p); $("versesBtn").innerHTML = "Show the memory verses first"; return; }
+  var html = "";
+  for (var i = 0; i < LESSON_ORDER.length; i++){
+    var n = LESSON_ORDER[i], L = LESSONS[n];
+    html += '<div class="verse"><div class="ref">Lesson ' + n + ' memory verse, ' + L.verseRef + '</div>' +
+            '<div class="txt">' + L.verse + '</div>' +
+            '<div class="reading">Bible reading for this lesson: ' + L.reading + '</div></div>';
+  }
+  p.innerHTML = html;
+  show(p);
+  $("versesBtn").innerHTML = "Hide the memory verses";
+});
+
+/* ================= starting a round ================= */
+/* How many life application questions a round of n questions gets:
+   the most that stays at or under 15%, and at least one in any round
+   of 4 or more (a very short round can therefore go a little over). */
+function lifeQuota(n){
+  var k = Math.floor(n * 0.15 + 1e-9);
+  if (n >= 4 && k < 1) k = 1;
+  return k;
+}
+
+function buildQueue(){
+  var all = shuffle(pool()), la = [], rest = [], i;
+  for (i = 0; i < all.length; i++) (all[i].la ? la : rest).push(all[i]);
+  var want = Math.max(1, Math.min(S.count, all.length));
+  var nLa = Math.min(lifeQuota(want), la.length);
+  if (want - nLa > rest.length) nLa = want - rest.length;   /* not enough other questions */
+  var p = shuffle(la.slice(0, nLa).concat(rest.slice(0, want - nLa)));
+  S.queue = [];
+  for (i = 0; i < want; i++){
+    var q = p[i], order = shuffle([0,1,2]), opts = [], ans = 0;
+    for (var k = 0; k < 3; k++){
+      opts.push(q.o[order[k]]);
+      if (order[k] === q.a) ans = k;
+    }
+    S.queue.push({q:q.q, s:q.s, lesson:q.lesson, v:q.v, la:q.la, o:opts, a:ans});
+  }
+  S.idx = 0; S.owner = 0; S.turn = 0;
+}
+
+on($("startBtn"), function(){
+  if ($("startBtn").disabled) return;
+  var names;
+  if (S.mode === "teams"){
+    names = lines($("teamNames").value).slice(0, S.teamCount);
+    while (names.length < S.teamCount) names.push("Team " + (names.length + 1));
+  } else {
+    names = lines($("soloNames").value);
+    if (!names.length) names = ["Student"];
+  }
+  S.players = [];
+  for (var i = 0; i < names.length; i++) S.players.push({name:names[i], score:0, right:0, asked:0});
+  var c = parseInt($("qCount").value, 10);
+  S.count = (isNaN(c) || c < 1) ? 15 : c;
+  buildQueue();
+  hide($("setup")); hide($("results")); show($("quiz"));
+  render();
+  scrollTop();
+});
+
+/* ================= quiz ================= */
+function render(){
+  clearPending();
+  var item = S.queue[S.idx], L = LESSONS[item.lesson];
+  S.answered = false; S.stolen = false; S.turn = S.owner;
+  /* The lesson is not shown while the question is open, so children learn to
+     recognise it from the question itself; it is revealed with the answer. */
+  $("qRibbon").innerHTML = "";
+  drawTurn("");
+  $("qCounter").innerHTML = "Question " + (S.idx + 1) + " of " + S.queue.length;
+  $("progBar").style.width = (S.idx / S.queue.length * 100) + "%";
+  $("qText").innerHTML = esc(item.q);
+  $("qTag").innerHTML = item.v ? "Bible verse question, worth 15 points" : (item.la ? "Life application, worth 10 points" : "Worth 10 points");
+  drawOptions(item);
+  hide($("reveal"));
+  show($("skipRow"));
+  if (S.players.length > 1) show($("skipTBtn")); else hide($("skipTBtn"));
+  $("skipTBtn").innerHTML = (S.mode === "teams") ? "Pass to the next team" : "Pass to the next student";
+  drawScores();
+}
+
+function drawTurn(prefix){
+  var who = esc(S.players[S.turn].name);
+  $("turnLabel").innerHTML = S.players.length > 1 ? (prefix || "Over to ") + "<b>" + who + "</b>" : "<b>" + who + "</b>";
+}
+
+function drawOptions(item){
+  var html = "";
+  for (var i = 0; i < item.o.length; i++){
+    html += '<button type="button" class="opt" data-i="' + i + '"><span class="opt-in">' +
+            '<span class="key">' + LETTERS[i] + '</span>' +
+            '<span class="body">' + esc(item.o[i]) + '</span></span></button>';
+  }
+  $("opts").innerHTML = html;
+  var bs = $("opts").getElementsByTagName("button");
+  for (var k = 0; k < bs.length; k++){
+    (function(b){ on(b, function(){ choose(parseInt(b.getAttribute("data-i"), 10)); }); })(bs[k]);
+  }
+}
+
+function choose(i){
+  if (S.answered || S.stealTimer) return;
+  var item = S.queue[S.idx];
+  var pts = item.v ? 15 : 10, half = Math.round(pts / 2);
+  var who = S.players[S.turn];
+  var right = (i === item.a);
+  who.asked++;
+
+  var bs = $("opts").getElementsByTagName("button");
+  for (var k = 0; k < bs.length; k++){
+    var bi = parseInt(bs[k].getAttribute("data-i"), 10);
+    bs[k].disabled = true;
+    if (bi === item.a) addClass(bs[k], "right");
+    else if (bi === i) addClass(bs[k], "wrong");
+    else addClass(bs[k], "dim");
+  }
+
+  if (right){
+    var got = S.stolen ? half : pts;
+    who.score += got; who.right++;
+    S.answered = true;
+    verdict("good", esc(who.name) + " is right. +" + got + (S.stolen ? " on the steal" : ""));
+  } else if (S.steal && !S.stolen && S.players.length > 1){
+    S.stolen = true;
+    S.turn = (S.turn + 1) % S.players.length;
+    verdict("steal", "Not that one. " + esc(S.players[S.turn].name) + " may steal for " + half + " points.");
+    S.stealTimer = setTimeout(function(){
+      S.stealTimer = null;
+      if (isHidden($("quiz"))) return;
+      drawOptions(S.queue[S.idx]);
+      hide($("reveal"));
+      drawTurn("Steal, over to ");
+      drawScores();
+    }, 1700);
+    drawScores();
+    return;
+  } else {
+    S.answered = true;
+    verdict("bad", "Not quite.");
+  }
+  $("source").innerHTML = "<b>Lesson " + item.lesson + ": " + esc(LESSONS[item.lesson].title) + "</b><br>Where to find it: " + esc(item.s);
+  hide($("skipRow"));
+  $("nextBtn").innerHTML = (S.idx + 1 >= S.queue.length) ? "See the final scores" : "Next question";
+  drawScores();
+  try { $("nextBtn").focus(); } catch(e){}
+}
+
+function verdict(kind, msg){
+  $("verdict").className = "verdict " + kind;
+  $("verdict").innerHTML = msg;
+  $("source").innerHTML = "";
+  show($("reveal"));
+  if (kind === "steal") hide($("nextBtn")); else show($("nextBtn"));
+}
+
+/* Next: the following question goes to the next team in order. */
+on($("nextBtn"), function(){
+  if (!S.answered) return;
+  S.idx++;
+  if (S.idx >= S.queue.length){ finish(); return; }
+  S.owner = (S.owner + 1) % S.players.length;
+  render();
+});
+
+/* Skip question: a new question, same team keeps its turn. */
+on($("skipQBtn"), function(){
+  if (S.answered) return;
+  S.idx++;
+  if (S.idx >= S.queue.length){ finish(); return; }
+  render();
+});
+
+/* Pass: same question, handed to the next team. */
+on($("skipTBtn"), function(){
+  if (S.answered || S.players.length < 2) return;
+  clearPending();
+  S.stolen = false;
+  S.owner = (S.owner + 1) % S.players.length;
+  S.turn = S.owner;
+  drawOptions(S.queue[S.idx]);
+  hide($("reveal"));
+  drawTurn("");
+  drawScores();
+});
+
+function drawScores(){
+  var html = "", i, p;
+  if (S.players.length > 4){
+    for (i = 0; i < S.players.length; i++){
+      p = S.players[i];
+      html += '<span class="score-mini' + (i === S.turn ? ' active' : '') + '">' + esc(p.name) + '<b>' + p.score + '</b></span>';
+    }
+  } else {
+    for (i = 0; i < S.players.length; i++){
+      p = S.players[i];
+      html += '<div class="score' + (i === S.turn ? ' active' : '') + '"><span class="nm">' + esc(p.name) + '</span>' +
+              '<span class="pt">' + p.score + '</span></div>';
+    }
+  }
+  $("scorebar").innerHTML = html;
+}
+
+/* ================= confirmation dialog ================= */
+function ask(msg, sub, yesLabel, fn){
+  $("modalMsg").innerHTML = esc(msg);
+  $("modalSub").innerHTML = esc(sub);
+  $("modalYes").innerHTML = esc(yesLabel);
+  S.pending = fn;
+  show($("modal"));
+  try { $("modalYes").focus(); } catch(e){}
+}
+function closeModal(){ hide($("modal")); S.pending = null; }
+on($("modalNo"), closeModal);
+on($("modalYes"), function(){ var f = S.pending; closeModal(); if (typeof f === "function") f(); });
+$("modal").addEventListener("click", function(e){ if (e.target === $("modal")) closeModal(); }, false);
+
+/* ================= leaving or restarting ================= */
+function clearPending(){
+  if (S.stealTimer){ clearTimeout(S.stealTimer); S.stealTimer = null; }
+}
+function goHome(){
+  clearPending(); closeModal();
+  hide($("quiz")); hide($("results")); show($("setup"));
+  refreshPool(); scrollTop();
+}
+function restartRound(){
+  clearPending();
+  for (var i = 0; i < S.players.length; i++){ S.players[i].score = 0; S.players[i].right = 0; S.players[i].asked = 0; }
+  buildQueue(); render(); scrollTop();
+}
+
+on($("homeBtn"), function(){
+  ask("Leave this quiz?",
+      "You will go back to the start screen and the current scores will be lost.",
+      "Yes, go to the start screen", goHome);
+});
+on($("resetBtn"), function(){
+  ask("Start this round again?",
+      "The same teams or students are kept, the scores go back to zero and a fresh set of questions is drawn.",
+      "Yes, reset the round", restartRound);
+});
+on($("quitBtn"), function(){
+  ask("End the quiz here?",
+      "The remaining questions are dropped and the scores as they stand are shown.",
+      "Yes, show the scores", function(){ clearPending(); finish(); });
+});
+on($("againBtn"), goHome);
+
+/* ================= results ================= */
+function finish(){
+  clearPending();
+  hide($("quiz")); show($("results"));
+  var sorted = S.players.slice().sort(function(a,b){ return b.score - a.score; });
+  var top = sorted[0], ties = 0, done = 0, got = 0, i;
+  for (i = 0; i < sorted.length; i++){
+    if (sorted[i].score === top.score) ties++;
+    done += sorted[i].asked; got += sorted[i].right;
+  }
+  $("winnerLine").innerHTML = S.players.length === 1 ? (top.score + " points")
+    : (ties > 1 ? "A tie at " + top.score + " points" : esc(top.name) + " wins");
+  $("resultSub").innerHTML = got + " of " + done + " answered correctly";
+  var html = "", rank = 0, prev = null;
+  for (i = 0; i < sorted.length; i++){
+    var p = sorted[i];
+    if (p.score !== prev){ rank = i + 1; prev = p.score; }
+    html += '<div class="result-row"><span class="rank">' + rank + '</span>' +
+            '<span class="who">' + esc(p.name) +
+            '<span class="det">' + p.right + ' right out of ' + p.asked + ' asked</span></span>' +
+            '<span class="pts">' + p.score + '</span></div>';
+  }
+  $("resultList").innerHTML = html;
+  scrollTop();
+}
+
+/* ================= keyboard (for laptops and projectors) ================= */
+document.addEventListener("keydown", function(e){
+  var k = e.key || "", c = e.keyCode;
+  if (!isHidden($("modal"))){
+    if (k === "Escape" || k === "Esc" || c === 27){ closeModal(); e.preventDefault(); }
+    return;
+  }
+  if (isHidden($("quiz"))) return;
+  var tag = (e.target && e.target.tagName) || "";
+  if (tag === "TEXTAREA" || tag === "INPUT") return;
+  var n = (k === "1" || c === 49 || c === 97) ? 0 : (k === "2" || c === 50 || c === 98) ? 1 : (k === "3" || c === 51 || c === 99) ? 2 : -1;
+  if (n > -1 && !S.answered && !S.stealTimer){ choose(n); e.preventDefault(); }
+  else if ((k === "Enter" || c === 13) && S.answered && !isHidden($("reveal"))){ $("nextBtn").click(); e.preventDefault(); }
+}, false);
+
+drawLessons();
+refreshPool();
+/* Everything above ran, so this viewer runs scripts: remove the warning. */
+(function(){ var n = $("noRun"); if (n && n.parentNode) n.parentNode.removeChild(n); })();
+</script>
+</body>
+</html>
