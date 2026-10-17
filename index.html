@@ -301,6 +301,9 @@ textarea:focus,input:focus{outline:2px solid #F0A028;outline-offset:1px}
     <div class="row" style="margin-top:12px">
       <button type="button" class="chip" id="teams2">2 teams</button>
       <button type="button" class="chip on" id="teams3">3 teams</button>
+      <button type="button" class="chip" id="teams4">4 teams</button>
+      <button type="button" class="chip" id="teams5">5 teams</button>
+      <button type="button" class="chip" id="teams6">6 teams</button>
     </div>
     <div style="margin-top:12px">
       <textarea id="teamNames" rows="3" aria-label="Team names, one per line">Team 1
@@ -1286,16 +1289,21 @@ function setMode(m){
 on($("modeTeams"), function(){ setMode("teams"); });
 on($("modeSolo"),  function(){ setMode("solo"); });
 
+/* Team options run from MIN_TEAMS to MAX_TEAMS; add a button with id "teamsN" to offer more. */
+var MIN_TEAMS = 2, MAX_TEAMS = 6;
 function setTeams(n){
   S.teamCount = n;
-  setOn($("teams2"), n === 2);
-  setOn($("teams3"), n === 3);
+  for (var t = MIN_TEAMS; t <= MAX_TEAMS; t++) setOn($("teams" + t), n === t);
+  $("teamNames").rows = n;
   var cur = lines($("teamNames").value), out = [];
   for (var i = 0; i < n; i++) out.push(cur[i] || ("Team " + (i + 1)));
   $("teamNames").value = out.join("\n");
 }
-on($("teams2"), function(){ setTeams(2); });
-on($("teams3"), function(){ setTeams(3); });
+(function(){
+  for (var t = MIN_TEAMS; t <= MAX_TEAMS; t++){
+    (function(n){ on($("teams" + n), function(){ setTeams(n); }); })(t);
+  }
+})();
 
 $("optVerses").addEventListener("change", function(){ S.verses = $("optVerses").checked; refreshPool(); }, false);
 $("optSteal").addEventListener("change",  function(){ S.steal = $("optSteal").checked; }, false);
